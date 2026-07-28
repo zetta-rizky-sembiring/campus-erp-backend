@@ -1,12 +1,17 @@
+// *************** IMPORT LIBRARY ***************
 const express = require('express');
 const cors = require('cors');
 const { expressMiddleware } = require('@apollo/server/express4');
 
+// *************** IMPORT MODULE ***************
 const config = require('./core/config');
 require('./core/db');
 
 const server = require('./core/apollo');
 
+// *************** GLOBAL VARIABLES ***************
+
+// *************** MUTATION ***************
 async function startServer() {
   const app = express();
 
@@ -26,6 +31,7 @@ async function startServer() {
   });
 }
 
+// *************** EXPORT MODULE ***************
 startServer().catch((err) => {
   console.error(err);
   process.exit(1);
