@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 // *************** IMPORT MODULE ***************
 const config = require('./config');
 
-// *************** GLOBAL VARIABLES ***************
 mongoose
   .connect(config.db.uri)
   .then(() => {

@@ -9,8 +9,6 @@ require('./core/db');
 
 const server = require('./core/apollo');
 
-// *************** GLOBAL VARIABLES ***************
-
 // *************** MUTATION ***************
 async function startServer() {
   const app = express();
