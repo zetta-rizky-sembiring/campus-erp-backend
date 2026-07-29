@@ -3,12 +3,17 @@ const { ApolloServer } = require('@apollo/server');
 
 // *************** IMPORT MODULE ***************
 const system = require('../features/system');
+const curriculumTypeDefs = require('../features/academic/curriculum/curriculum.typedef');
+const curriculumMutationResolvers = require('../features/academic/curriculum/curriculum.mutation.resolver');
+const curriculumQueryResolvers = require('../features/academic/curriculum/curriculum.query.resolver');
 
 // *************** GLOBAL VARIABLES ***************
-
 const server = new ApolloServer({
-  typeDefs: [system.typeDefs],
-  resolvers: [system.resolvers],
+  typeDefs: [system.typeDefs, curriculumTypeDefs],
+  resolvers: [system.resolvers, {
+    Query: curriculumQueryResolvers,
+    Mutation: curriculumMutationResolvers,
+  }],
 });
 
 // *************** EXPORT MODULE ***************
