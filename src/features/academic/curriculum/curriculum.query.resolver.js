@@ -1,18 +1,6 @@
 // *************** IMPORT MODULE ***************
 const { BlockModel, SubjectModel, TestModel } = require('./curriculum.model');
-
-// *************** IMPORT LIBRARY ***************
-const mongoose = require('mongoose');
-
-// *************** IMPORT HELPER FUNCTION ***************
-function normalizeId(id) {
-  if (!id) return id;
-  if (id instanceof mongoose.Types.ObjectId) return id;
-  if (typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id)) {
-    return new mongoose.Types.ObjectId(id);
-  }
-  return id;
-}
+const { normalizeObjectId } = require('../../../shared/utils/normalize_object_id');
 
 function serializeBlock(document) {
   const data = document?.toObject ? document.toObject() : document;
@@ -64,7 +52,7 @@ async function getBlocks() {
 }
 
 async function getBlock(_, { id }) {
-  const document = await BlockModel.findById(normalizeId(id)).lean();
+  const document = await BlockModel.findById(normalizeObjectId(id)).lean();
   return document ? serializeBlock(document) : null;
 }
 
@@ -74,7 +62,7 @@ async function getSubjects() {
 }
 
 async function getSubject(_, { id }) {
-  const document = await SubjectModel.findById(normalizeId(id)).lean();
+  const document = await SubjectModel.findById(normalizeObjectId(id)).lean();
   return document ? serializeSubject(document) : null;
 }
 
@@ -84,7 +72,7 @@ async function getTests() {
 }
 
 async function getTest(_, { id }) {
-  const document = await TestModel.findById(normalizeId(id)).lean();
+  const document = await TestModel.findById(normalizeObjectId(id)).lean();
   return document ? serializeTest(document) : null;
 }
 

@@ -4,21 +4,7 @@ const mongoose = require('mongoose');
 // *************** IMPORT MODULE ***************
 const { SubjectModel, TestModel } = require('./curriculum.model');
 const { AppError, ERROR_CODES } = require('../../../core/error');
-
-// *************** IMPORT HELPER FUNCTION ***************
-/**
- * Ensure total subject weightage for a block does not exceed 100 when adding a new subject.
- * @param {String|mongoose.Types.ObjectId} blockId
- * @param {Number} incomingWeightage
- */
-function normalizeObjectId(id) {
-	if (!id) return id;
-	if (id instanceof mongoose.Types.ObjectId) return id;
-	if (typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id)) {
-		return new mongoose.Types.ObjectId(id);
-	}
-	return id;
-}
+const { normalizeObjectId } = require('../../../shared/utils/normalize_object_id');
 
 function roundWeightage(total) {
 	return Math.round((total + Number.EPSILON) * 100) / 100;

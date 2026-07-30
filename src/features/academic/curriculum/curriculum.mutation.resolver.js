@@ -15,44 +15,13 @@ const {
 	ensureNoGradesLock,
 } = require('./curriculum.helper');
 const { AppError } = require('../../../core/error');
+const { normalizeGqlError } = require('../../../shared/utils/normalize_gql_error');
 
 // *************** IMPORT LIBRARY ***************
 const mongoose = require('mongoose');
+const { normalizeObjectId } = require('../../../shared/utils/normalize_object_id');
 
 // *************** IMPORT HELPER FUNCTION ***************
-function NormalizeGqlError(error) {
-	if (error && error.extensions) {
-		return error;
-	}
-
-	if (error instanceof AppError) {
-		const normalizedError = new Error(error.message);
-		normalizedError.extensions = {
-			code: error.code,
-			statusCode: error.statusCode,
-		};
-		return normalizedError;
-	}
-
-	const message = error?.message || 'Unexpected error';
-	const isValidationError = typeof message === 'string' && message.startsWith('Validation failed');
-	const normalizedError = new Error(message);
-	normalizedError.extensions = {
-		code: isValidationError ? 'VALIDATION_ERROR' : (error?.code || 'INTERNAL_SERVER_ERROR'),
-		statusCode: isValidationError ? 400 : (error?.statusCode || 500),
-	};
-	return normalizedError;
-}
-
-function normalizeId(id) {
-	if (!id) return id;
-	if (id instanceof mongoose.Types.ObjectId) return id;
-	if (typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id)) {
-		return new mongoose.Types.ObjectId(id);
-	}
-	return id;
-}
-
 function mapInputToDbPayload(payload = {}) {
 	const normalizedPayload = { ...payload };
 	const fieldMap = {
@@ -125,7 +94,7 @@ async function createBlockRecord(payload) {
 
 async function updateBlockRecord(id, payload) {
 	const normalizedPayload = mapInputToDbPayload(payload);
-	const document = await BlockModel.findByIdAndUpdate(normalizeId(id), { $set: normalizedPayload }, {
+	const document = await BlockModel.findByIdAndUpdate(normalizeObjectId(id), { $set: normalizedPayload }, {
 		new: true,
 		runValidators: true,
 	});
@@ -138,7 +107,7 @@ async function updateBlockRecord(id, payload) {
 }
 
 async function deleteBlockRecord(id) {
-	const objectId = normalizeId(id);
+	const objectId = normalizeObjectId(id);
 	await ensureNoGradesLock('block', objectId);
 	const result = await BlockModel.deleteOne({ _id: objectId });
 	return result.deletedCount > 0;
@@ -157,7 +126,7 @@ async function createSubjectRecord(payload) {
 
 async function updateSubjectRecord(id, payload) {
 	const normalizedPayload = mapInputToDbPayload(payload);
-	const document = await SubjectModel.findByIdAndUpdate(normalizeId(id), { $set: normalizedPayload }, {
+	const document = await SubjectModel.findByIdAndUpdate(normalizeObjectId(id), { $set: normalizedPayload }, {
 		new: true,
 		runValidators: true,
 	});
@@ -170,7 +139,7 @@ async function updateSubjectRecord(id, payload) {
 }
 
 async function deleteSubjectRecord(id) {
-	const objectId = normalizeId(id);
+	const objectId = normalizeObjectId(id);
 	await ensureNoGradesLock('subject', objectId);
 	const result = await SubjectModel.deleteOne({ _id: objectId });
 	return result.deletedCount > 0;
@@ -189,7 +158,7 @@ async function createTestRecord(payload) {
 
 async function updateTestRecord(id, payload) {
 	const normalizedPayload = mapInputToDbPayload(payload);
-	const document = await TestModel.findByIdAndUpdate(normalizeId(id), { $set: normalizedPayload }, {
+	const document = await TestModel.findByIdAndUpdate(normalizeObjectId(id), { $set: normalizedPayload }, {
 		new: true,
 		runValidators: true,
 	});
@@ -202,7 +171,7 @@ async function updateTestRecord(id, payload) {
 }
 
 async function deleteTestRecord(id) {
-	const objectId = normalizeId(id);
+	const objectId = normalizeObjectId(id);
 	await ensureNoGradesLock('test', objectId);
 	const result = await TestModel.deleteOne({ _id: objectId });
 	return result.deletedCount > 0;
@@ -215,7 +184,7 @@ async function createBlock(_, { input }) {
 		// *************** END: Validate input payload ***************
 		return createBlockRecord(payload);
 	} catch (error) {
-		throw NormalizeGqlError(error);
+		throw normalizeGqlError(error);
 	}
 }
 
@@ -226,7 +195,7 @@ async function updateBlock(_, { id, input }) {
 		// *************** END: Validate input payload ***************
 		return updateBlockRecord(id, payload);
 	} catch (error) {
-		throw NormalizeGqlError(error);
+		throw normalizeGqlError(error);
 	}
 }
 
@@ -234,7 +203,7 @@ async function deleteBlock(_, { id }) {
 	try {
 		return deleteBlockRecord(id);
 	} catch (error) {
-		throw NormalizeGqlError(error);
+		throw normalizeGqlError(error);
 	}
 }
 
@@ -245,7 +214,7 @@ async function createSubject(_, { input }) {
 		// *************** END: Validate input payload ***************
 		return createSubjectRecord(payload);
 	} catch (error) {
-		throw NormalizeGqlError(error);
+		throw normalizeGqlError(error);
 	}
 }
 
@@ -256,7 +225,7 @@ async function updateSubject(_, { id, input }) {
 		// *************** END: Validate input payload ***************
 		return updateSubjectRecord(id, payload);
 	} catch (error) {
-		throw NormalizeGqlError(error);
+		throw normalizeGqlError(error);
 	}
 }
 
@@ -264,7 +233,7 @@ async function deleteSubject(_, { id }) {
 	try {
 		return deleteSubjectRecord(id);
 	} catch (error) {
-		throw NormalizeGqlError(error);
+		throw normalizeGqlError(error);
 	}
 }
 
@@ -275,7 +244,7 @@ async function createTest(_, { input }) {
 		// *************** END: Validate input payload ***************
 		return createTestRecord(payload);
 	} catch (error) {
-		throw NormalizeGqlError(error);
+		throw normalizeGqlError(error);
 	}
 }
 
@@ -286,7 +255,7 @@ async function updateTest(_, { id, input }) {
 		// *************** END: Validate input payload ***************
 		return updateTestRecord(id, payload);
 	} catch (error) {
-		throw NormalizeGqlError(error);
+		throw normalizeGqlError(error);
 	}
 }
 
@@ -294,7 +263,7 @@ async function deleteTest(_, { id }) {
 	try {
 		return deleteTestRecord(id);
 	} catch (error) {
-		throw NormalizeGqlError(error);
+		throw normalizeGqlError(error);
 	}
 }
 

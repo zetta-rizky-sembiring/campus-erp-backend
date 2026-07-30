@@ -1,3 +1,4 @@
+// *************** EXPORT MODULE ***************
 module.exports = `
   type GradingRule {
     label: String!
