@@ -1,7 +1,7 @@
 // *************** IMPORT MODULE ***************
 const { BlockModel, SubjectModel, TestModel } = require('./curriculum.model');
 const {
-	validateInput,
+	ValidateInput,
 	createBlockSchema,
 	updateBlockSchema,
 	createSubjectSchema,
@@ -10,19 +10,19 @@ const {
 	updateTestSchema,
 } = require('./curriculum.validator');
 const {
-	ensureSubjectWeightageWithinLimit,
-	ensureTestWeightageWithinLimit,
-	ensureNoGradesLock,
+	EnsureSubjectWeightageWithinLimit,
+	EnsureTestWeightageWithinLimit,
+	EnsureNoGradesLock,
 } = require('./curriculum.helper');
 const { AppError } = require('../../../core/error');
-const { normalizeGqlError } = require('../../../shared/utils/normalize_gql_error');
+const { NormalizeGqlError } = require('../../../shared/utils/normalize_gql_error');
 
 // *************** IMPORT LIBRARY ***************
 const mongoose = require('mongoose');
-const { normalizeObjectId } = require('../../../shared/utils/normalize_object_id');
+const { NormalizeObjectId } = require('../../../shared/utils/normalize_object_id');
 
 // *************** IMPORT HELPER FUNCTION ***************
-function mapInputToDbPayload(payload = {}) {
+function MapInputToDbPayload(payload = {}) {
 	const normalizedPayload = { ...payload };
 	const fieldMap = {
 		academicYear: 'academic_year',
@@ -41,7 +41,7 @@ function mapInputToDbPayload(payload = {}) {
 	return normalizedPayload;
 }
 
-function serializeBlock(document) {
+function SerializeBlock(document) {
 	const data = document?.toObject ? document.toObject() : document;
 	return {
 		id: data._id ? data._id.toString() : data.id,
@@ -55,7 +55,7 @@ function serializeBlock(document) {
 	};
 }
 
-function serializeSubject(document) {
+function SerializeSubject(document) {
 	const data = document?.toObject ? document.toObject() : document;
 	return {
 		id: data._id ? data._id.toString() : data.id,
@@ -70,7 +70,7 @@ function serializeSubject(document) {
 	};
 }
 
-function serializeTest(document) {
+function SerializeTest(document) {
 	const data = document?.toObject ? document.toObject() : document;
 	return {
 		id: data._id ? data._id.toString() : data.id,
@@ -86,15 +86,15 @@ function serializeTest(document) {
 }
 
 // *************** MUTATION ***************
-async function createBlockRecord(payload) {
-	const normalizedPayload = mapInputToDbPayload(payload);
+async function CreateBlockRecord(payload) {
+	const normalizedPayload = MapInputToDbPayload(payload);
 	const document = await BlockModel.create(normalizedPayload);
-	return serializeBlock(document);
+	return SerializeBlock(document);
 }
 
-async function updateBlockRecord(id, payload) {
-	const normalizedPayload = mapInputToDbPayload(payload);
-	const document = await BlockModel.findByIdAndUpdate(normalizeObjectId(id), { $set: normalizedPayload }, {
+async function UpdateBlockRecord(id, payload) {
+	const normalizedPayload = MapInputToDbPayload(payload);
+	const document = await BlockModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: normalizedPayload }, {
 		new: true,
 		runValidators: true,
 	});
@@ -103,30 +103,30 @@ async function updateBlockRecord(id, payload) {
 		throw new AppError('Block not found', 'NOT_FOUND', 404);
 	}
 
-	return serializeBlock(document);
+	return SerializeBlock(document);
 }
 
-async function deleteBlockRecord(id) {
-	const objectId = normalizeObjectId(id);
-	await ensureNoGradesLock('block', objectId);
+async function DeleteBlockRecord(id) {
+	const objectId = NormalizeObjectId(id);
+	await EnsureNoGradesLock('block', objectId);
 	const result = await BlockModel.deleteOne({ _id: objectId });
 	return result.deletedCount > 0;
 }
 
-async function createSubjectRecord(payload) {
-	const normalizedPayload = mapInputToDbPayload(payload);
+async function CreateSubjectRecord(payload) {
+	const normalizedPayload = MapInputToDbPayload(payload);
 
 	// *************** START: Ensure block subject weightage remains within limit ***************
-	await ensureSubjectWeightageWithinLimit(normalizedPayload.block_id, normalizedPayload.weightage);
+	await EnsureSubjectWeightageWithinLimit(normalizedPayload.block_id, normalizedPayload.weightage);
 	// *************** END: Ensure block subject weightage remains within limit ***************
 
 	const document = await SubjectModel.create(normalizedPayload);
-	return serializeSubject(document);
+	return SerializeSubject(document);
 }
 
-async function updateSubjectRecord(id, payload) {
-	const normalizedPayload = mapInputToDbPayload(payload);
-	const document = await SubjectModel.findByIdAndUpdate(normalizeObjectId(id), { $set: normalizedPayload }, {
+async function UpdateSubjectRecord(id, payload) {
+	const normalizedPayload = MapInputToDbPayload(payload);
+	const document = await SubjectModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: normalizedPayload }, {
 		new: true,
 		runValidators: true,
 	});
@@ -135,30 +135,30 @@ async function updateSubjectRecord(id, payload) {
 		throw new AppError('Subject not found', 'NOT_FOUND', 404);
 	}
 
-	return serializeSubject(document);
+	return SerializeSubject(document);
 }
 
-async function deleteSubjectRecord(id) {
-	const objectId = normalizeObjectId(id);
-	await ensureNoGradesLock('subject', objectId);
+async function DeleteSubjectRecord(id) {
+	const objectId = NormalizeObjectId(id);
+	await EnsureNoGradesLock('subject', objectId);
 	const result = await SubjectModel.deleteOne({ _id: objectId });
 	return result.deletedCount > 0;
 }
 
-async function createTestRecord(payload) {
-	const normalizedPayload = mapInputToDbPayload(payload);
+async function CreateTestRecord(payload) {
+	const normalizedPayload = MapInputToDbPayload(payload);
 
 	// *************** START: Ensure subject test weightage remains within limit ***************
-	await ensureTestWeightageWithinLimit(normalizedPayload.subject_id, normalizedPayload.weightage);
+	await EnsureTestWeightageWithinLimit(normalizedPayload.subject_id, normalizedPayload.weightage);
 	// *************** END: Ensure subject test weightage remains within limit ***************
 
 	const document = await TestModel.create(normalizedPayload);
-	return serializeTest(document);
+	return SerializeTest(document);
 }
 
-async function updateTestRecord(id, payload) {
-	const normalizedPayload = mapInputToDbPayload(payload);
-	const document = await TestModel.findByIdAndUpdate(normalizeObjectId(id), { $set: normalizedPayload }, {
+async function UpdateTestRecord(id, payload) {
+	const normalizedPayload = MapInputToDbPayload(payload);
+	const document = await TestModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: normalizedPayload }, {
 		new: true,
 		runValidators: true,
 	});
@@ -167,115 +167,115 @@ async function updateTestRecord(id, payload) {
 		throw new AppError('Test not found', 'NOT_FOUND', 404);
 	}
 
-	return serializeTest(document);
+	return SerializeTest(document);
 }
 
-async function deleteTestRecord(id) {
-	const objectId = normalizeObjectId(id);
-	await ensureNoGradesLock('test', objectId);
+async function DeleteTestRecord(id) {
+	const objectId = NormalizeObjectId(id);
+	await EnsureNoGradesLock('test', objectId);
 	const result = await TestModel.deleteOne({ _id: objectId });
 	return result.deletedCount > 0;
 }
 
-async function createBlock(_, { input }) {
+async function CreateBlock(_, { input }) {
 	try {
 		// *************** START: Validate input payload ***************
-		const payload = validateInput(createBlockSchema, input);
+		const payload = ValidateInput(createBlockSchema, input);
 		// *************** END: Validate input payload ***************
-		return createBlockRecord(payload);
+		return CreateBlockRecord(payload);
 	} catch (error) {
-		throw normalizeGqlError(error);
+		throw NormalizeGqlError(error);
 	}
 }
 
-async function updateBlock(_, { id, input }) {
+async function UpdateBlock(_, { id, input }) {
 	try {
 		// *************** START: Validate input payload ***************
-		const payload = validateInput(updateBlockSchema, input);
+		const payload = ValidateInput(updateBlockSchema, input);
 		// *************** END: Validate input payload ***************
-		return updateBlockRecord(id, payload);
+		return UpdateBlockRecord(id, payload);
 	} catch (error) {
-		throw normalizeGqlError(error);
+		throw NormalizeGqlError(error);
 	}
 }
 
-async function deleteBlock(_, { id }) {
+async function DeleteBlock(_, { id }) {
 	try {
-		return deleteBlockRecord(id);
+		return DeleteBlockRecord(id);
 	} catch (error) {
-		throw normalizeGqlError(error);
+		throw NormalizeGqlError(error);
 	}
 }
 
-async function createSubject(_, { input }) {
+async function CreateSubject(_, { input }) {
 	try {
 		// *************** START: Validate input payload ***************
-		const payload = validateInput(createSubjectSchema, input);
+		const payload = ValidateInput(createSubjectSchema, input);
 		// *************** END: Validate input payload ***************
-		return createSubjectRecord(payload);
+		return CreateSubjectRecord(payload);
 	} catch (error) {
-		throw normalizeGqlError(error);
+		throw NormalizeGqlError(error);
 	}
 }
 
-async function updateSubject(_, { id, input }) {
+async function UpdateSubject(_, { id, input }) {
 	try {
 		// *************** START: Validate input payload ***************
-		const payload = validateInput(updateSubjectSchema, input);
+		const payload = ValidateInput(updateSubjectSchema, input);
 		// *************** END: Validate input payload ***************
-		return updateSubjectRecord(id, payload);
+		return UpdateSubjectRecord(id, payload);
 	} catch (error) {
-		throw normalizeGqlError(error);
+		throw NormalizeGqlError(error);
 	}
 }
 
-async function deleteSubject(_, { id }) {
+async function DeleteSubject(_, { id }) {
 	try {
-		return deleteSubjectRecord(id);
+		return DeleteSubjectRecord(id);
 	} catch (error) {
-		throw normalizeGqlError(error);
+		throw NormalizeGqlError(error);
 	}
 }
 
-async function createTest(_, { input }) {
+async function CreateTest(_, { input }) {
 	try {
 		// *************** START: Validate input payload ***************
-		const payload = validateInput(createTestSchema, input);
+		const payload = ValidateInput(createTestSchema, input);
 		// *************** END: Validate input payload ***************
-		return createTestRecord(payload);
+		return CreateTestRecord(payload);
 	} catch (error) {
-		throw normalizeGqlError(error);
+		throw NormalizeGqlError(error);
 	}
 }
 
-async function updateTest(_, { id, input }) {
+async function UpdateTest(_, { id, input }) {
 	try {
 		// *************** START: Validate input payload ***************
-		const payload = validateInput(updateTestSchema, input);
+		const payload = ValidateInput(updateTestSchema, input);
 		// *************** END: Validate input payload ***************
-		return updateTestRecord(id, payload);
+		return UpdateTestRecord(id, payload);
 	} catch (error) {
-		throw normalizeGqlError(error);
+		throw NormalizeGqlError(error);
 	}
 }
 
-async function deleteTest(_, { id }) {
+async function DeleteTest(_, { id }) {
 	try {
-		return deleteTestRecord(id);
+		return DeleteTestRecord(id);
 	} catch (error) {
-		throw normalizeGqlError(error);
+		throw NormalizeGqlError(error);
 	}
 }
 
 // *************** EXPORT MODULE ***************
 module.exports = {
-	createBlock,
-	updateBlock,
-	deleteBlock,
-	createSubject,
-	updateSubject,
-	deleteSubject,
-	createTest,
-	updateTest,
-	deleteTest,
+	createBlock: CreateBlock,
+	updateBlock: UpdateBlock,
+	deleteBlock: DeleteBlock,
+	createSubject: CreateSubject,
+	updateSubject: UpdateSubject,
+	deleteSubject: DeleteSubject,
+	createTest: CreateTest,
+	updateTest: UpdateTest,
+	deleteTest: DeleteTest,
 };

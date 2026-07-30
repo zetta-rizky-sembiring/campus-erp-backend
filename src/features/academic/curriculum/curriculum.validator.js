@@ -57,7 +57,7 @@ const updateTestSchema = Joi.object({
   grading_rules: gradingRulesSchema,
 }).unknown(false);
 
-const validateInput = (schema, payload) => {
+const ValidateInput = (schema, payload) => {
   const { error, value } = schema.validate(payload, {
     abortEarly: false,
     allowUnknown: false,
@@ -81,5 +81,5 @@ module.exports = {
   updateSubjectSchema,
   createTestSchema,
   updateTestSchema,
-  validateInput,
+  ValidateInput,
 };

@@ -10,7 +10,7 @@ require('./core/db');
 const server = require('./core/apollo');
 
 // *************** MUTATION ***************
-async function startServer() {
+async function StartServer() {
   const app = express();
 
   app.use(cors());
@@ -30,7 +30,7 @@ async function startServer() {
 }
 
 // *************** EXPORT MODULE ***************
-startServer().catch((err) => {
+StartServer().catch((err) => {
   console.error(err);
   process.exit(1);
 });

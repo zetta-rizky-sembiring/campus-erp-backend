@@ -1,8 +1,8 @@
 // *************** IMPORT MODULE ***************
 const { BlockModel, SubjectModel, TestModel } = require('./curriculum.model');
-const { normalizeObjectId } = require('../../../shared/utils/normalize_object_id');
+const { NormalizeObjectId } = require('../../../shared/utils/normalize_object_id');
 
-function serializeBlock(document) {
+function SerializeBlock(document) {
   const data = document?.toObject ? document.toObject() : document;
   return {
     id: data._id ? data._id.toString() : data.id,
@@ -16,7 +16,7 @@ function serializeBlock(document) {
   };
 }
 
-function serializeSubject(document) {
+function SerializeSubject(document) {
   const data = document?.toObject ? document.toObject() : document;
   return {
     id: data._id ? data._id.toString() : data.id,
@@ -31,7 +31,7 @@ function serializeSubject(document) {
   };
 }
 
-function serializeTest(document) {
+function SerializeTest(document) {
   const data = document?.toObject ? document.toObject() : document;
   return {
     id: data._id ? data._id.toString() : data.id,
@@ -46,41 +46,41 @@ function serializeTest(document) {
   };
 }
 
-async function getBlocks() {
+async function GetBlocks() {
   const documents = await BlockModel.find().lean();
-  return (documents || []).map(serializeBlock);
+  return (documents || []).map(SerializeBlock);
 }
 
-async function getBlock(_, { id }) {
-  const document = await BlockModel.findById(normalizeObjectId(id)).lean();
-  return document ? serializeBlock(document) : null;
+async function GetBlock(_, { id }) {
+  const document = await BlockModel.findById(NormalizeObjectId(id)).lean();
+  return document ? SerializeBlock(document) : null;
 }
 
-async function getSubjects() {
+async function GetSubjects() {
   const documents = await SubjectModel.find().lean();
-  return (documents || []).map(serializeSubject);
+  return (documents || []).map(SerializeSubject);
 }
 
-async function getSubject(_, { id }) {
-  const document = await SubjectModel.findById(normalizeObjectId(id)).lean();
-  return document ? serializeSubject(document) : null;
+async function GetSubject(_, { id }) {
+  const document = await SubjectModel.findById(NormalizeObjectId(id)).lean();
+  return document ? SerializeSubject(document) : null;
 }
 
-async function getTests() {
+async function GetTests() {
   const documents = await TestModel.find().lean();
-  return (documents || []).map(serializeTest);
+  return (documents || []).map(SerializeTest);
 }
 
-async function getTest(_, { id }) {
-  const document = await TestModel.findById(normalizeObjectId(id)).lean();
-  return document ? serializeTest(document) : null;
+async function GetTest(_, { id }) {
+  const document = await TestModel.findById(NormalizeObjectId(id)).lean();
+  return document ? SerializeTest(document) : null;
 }
 
 module.exports = {
-  blocks: getBlocks,
-  block: getBlock,
-  subjects: getSubjects,
-  subject: getSubject,
-  tests: getTests,
-  test: getTest,
+  blocks: GetBlocks,
+  block: GetBlock,
+  subjects: GetSubjects,
+  subject: GetSubject,
+  tests: GetTests,
+  test: GetTest,
 };

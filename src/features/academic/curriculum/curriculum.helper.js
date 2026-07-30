@@ -4,21 +4,21 @@ const mongoose = require('mongoose');
 // *************** IMPORT MODULE ***************
 const { SubjectModel, TestModel } = require('./curriculum.model');
 const { AppError, ERROR_CODES } = require('../../../core/error');
-const { normalizeObjectId } = require('../../../shared/utils/normalize_object_id');
+const { NormalizeObjectId } = require('../../../shared/utils/normalize_object_id');
 
-function roundWeightage(total) {
+function RoundWeightage(total) {
 	return Math.round((total + Number.EPSILON) * 100) / 100;
 }
 
-async function ensureSubjectWeightageWithinLimit(blockId, incomingWeightage) {
+async function EnsureSubjectWeightageWithinLimit(blockId, incomingWeightage) {
 	// *************** START: Normalize identifiers and load existing subject weightages ***************
-	const blockObjectId = normalizeObjectId(blockId);
+	const blockObjectId = NormalizeObjectId(blockId);
 	const subjects = await SubjectModel.find({ block_id: blockObjectId }).select('weightage').lean();
 	// *************** END: Normalize identifiers and load existing subject weightages ***************
 
 	// *************** START: Calculate total subject weightage ***************
 	const existingTotal = subjects.reduce((sum, s) => sum + (Number(s.weightage) || 0), 0);
-	const total = roundWeightage(existingTotal + Number(incomingWeightage || 0));
+	const total = RoundWeightage(existingTotal + Number(incomingWeightage || 0));
 	if (total > 100) {
 		throw new AppError(
 			`Total subject weightage for block ${blockId} would be ${total}%, exceeding 100%`,
@@ -36,15 +36,15 @@ async function ensureSubjectWeightageWithinLimit(blockId, incomingWeightage) {
  * @param {String|mongoose.Types.ObjectId} subjectId
  * @param {Number} incomingWeightage
  */
-async function ensureTestWeightageWithinLimit(subjectId, incomingWeightage) {
+async function EnsureTestWeightageWithinLimit(subjectId, incomingWeightage) {
 	// *************** START: Normalize identifiers and load existing test weightages ***************
-	const subjectObjectId = normalizeObjectId(subjectId);
+	const subjectObjectId = NormalizeObjectId(subjectId);
 	const tests = await TestModel.find({ subject_id: subjectObjectId }).select('weightage').lean();
 	// *************** END: Normalize identifiers and load existing test weightages ***************
 
 	// *************** START: Calculate total test weightage ***************
 	const existingTotal = tests.reduce((sum, t) => sum + (Number(t.weightage) || 0), 0);
-	const total = roundWeightage(existingTotal + Number(incomingWeightage || 0));
+	const total = RoundWeightage(existingTotal + Number(incomingWeightage || 0));
 	if (total > 100) {
 		throw new AppError(
 			`Total test weightage for subject ${subjectId} would be ${total}%, exceeding 100%`,
@@ -62,11 +62,11 @@ async function ensureTestWeightageWithinLimit(subjectId, incomingWeightage) {
  * entityType: 'block' | 'subject' | 'test'
  * entityId: string/ObjectId
  */
-async function ensureNoGradesLock(entityType, entityId) {
+async function EnsureNoGradesLock(entityType, entityId) {
 	// *************** START: Normalize identifier and build grade lock query ***************
 	const db = mongoose.connection.db;
 	const col = db.collection('studentgrades');
-	const oid = normalizeObjectId(entityId);
+	const oid = NormalizeObjectId(entityId);
 
 	let query = {};
 	if (entityType === 'block') query = { block_id: oid };
@@ -88,8 +88,8 @@ async function ensureNoGradesLock(entityType, entityId) {
 
 // *************** EXPORT MODULE ***************
 module.exports = {
-	ensureSubjectWeightageWithinLimit,
-	ensureTestWeightageWithinLimit,
-	ensureNoGradesLock,
+	EnsureSubjectWeightageWithinLimit,
+	EnsureTestWeightageWithinLimit,
+	EnsureNoGradesLock,
 };
 
