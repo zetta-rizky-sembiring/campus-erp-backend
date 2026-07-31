@@ -4,6 +4,10 @@ const mongoose = require('mongoose');
 // *************** GLOBAL VARIABLES ***************
 const { Schema, model } = mongoose;
 
+/**
+ * Represents a grading rule that defines the label,
+ * comparison operator, and threshold used for evaluation.
+ */
 const GradingRuleSchema = new Schema(
   {
     label: {
@@ -23,6 +27,10 @@ const GradingRuleSchema = new Schema(
   { _id: false }
 );
 
+/**
+ * Represents an academic block that groups related subjects
+ * and defines the default grading rules.
+ */
 const BlockSchema = new Schema({
   // Name of the academic block or learning cohort
   name: {
@@ -40,6 +48,10 @@ const BlockSchema = new Schema({
   grading_rules: [GradingRuleSchema],
 });
 
+/**
+ * Represents a subject that belongs to an academic block
+ * and contributes to the overall block weightage.
+ */
 const SubjectSchema = new Schema({
   // Name of the subject within the curriculum
   name: {
@@ -64,6 +76,10 @@ const SubjectSchema = new Schema({
   grading_rules: [GradingRuleSchema],
 });
 
+/**
+ * Represents an assessment within a subject,
+ * including its contribution to the subject's final score.
+ */
 const TestSchema = new Schema({
   // Name of the assessment or test
   name: {

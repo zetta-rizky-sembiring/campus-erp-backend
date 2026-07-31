@@ -2,85 +2,73 @@
 const { BlockModel, SubjectModel, TestModel } = require('./curriculum.model');
 const { NormalizeObjectId } = require('../../../shared/utils/normalize_object_id');
 
-function SerializeBlock(document) {
-  const data = document?.toObject ? document.toObject() : document;
-  return {
-    id: data._id ? data._id.toString() : data.id,
-    name: data.name,
-    academicYear: data.academic_year || data.academicYear,
-    gradingRules: (data.grading_rules || data.gradingRules || []).map((rule) => ({
-      label: rule.label,
-      operator: rule.operator,
-      threshold: rule.threshold,
-    })),
-  };
-}
-
-function SerializeSubject(document) {
-  const data = document?.toObject ? document.toObject() : document;
-  return {
-    id: data._id ? data._id.toString() : data.id,
-    name: data.name,
-    blockId: data.block_id ? data.block_id.toString() : data.blockId,
-    weightage: data.weightage,
-    gradingRules: (data.grading_rules || data.gradingRules || []).map((rule) => ({
-      label: rule.label,
-      operator: rule.operator,
-      threshold: rule.threshold,
-    })),
-  };
-}
-
-function SerializeTest(document) {
-  const data = document?.toObject ? document.toObject() : document;
-  return {
-    id: data._id ? data._id.toString() : data.id,
-    name: data.name,
-    subjectId: data.subject_id ? data.subject_id.toString() : data.subjectId,
-    weightage: data.weightage,
-    gradingRules: (data.grading_rules || data.gradingRules || []).map((rule) => ({
-      label: rule.label,
-      operator: rule.operator,
-      threshold: rule.threshold,
-    })),
-  };
-}
-
-async function GetBlocks() {
+// *************** QUERY ***************
+/**
+ * Retrieve all curriculum blocks.
+ * @returns {Promise<Object[]>}
+ */
+async function GetAllBlocks() {
   const documents = await BlockModel.find().lean();
-  return (documents || []).map(SerializeBlock);
+  return documents;
 }
 
-async function GetBlock(_, { id }) {
+/**
+ * Retrieve a curriculum block by its identifier.
+ * @param {Object} _
+ * @param {{ id: String }} args
+ * @returns {Promise<Object|null>}
+ */
+async function GetOneBlock(_, { id }) {
   const document = await BlockModel.findById(NormalizeObjectId(id)).lean();
-  return document ? SerializeBlock(document) : null;
+  return document;
 }
 
-async function GetSubjects() {
+/**
+ * Retrieve all curriculum subjects.
+ * @returns {Promise<Object[]>}
+ */
+async function GetAllSubjects() {
   const documents = await SubjectModel.find().lean();
-  return (documents || []).map(SerializeSubject);
+  return documents;
 }
 
-async function GetSubject(_, { id }) {
+/**
+ * Retrieve a curriculum subject by its identifier.
+ * @param {Object} _
+ * @param {{ id: String }} args
+ * @returns {Promise<Object|null>}
+ */
+async function GetOneSubject(_, { id }) {
   const document = await SubjectModel.findById(NormalizeObjectId(id)).lean();
-  return document ? SerializeSubject(document) : null;
+  return document;
 }
 
-async function GetTests() {
+/**
+ * Retrieve all curriculum tests.
+ * @returns {Promise<Object[]>}
+ */
+async function GetAllTests() {
   const documents = await TestModel.find().lean();
-  return (documents || []).map(SerializeTest);
+  return documents;
 }
 
-async function GetTest(_, { id }) {
+/**
+ * Retrieve a curriculum test by its identifier.
+ * @param {Object} _
+ * @param {{ id: String }} args
+ * @returns {Promise<Object|null>}
+ */
+async function GetOneTest(_, { id }) {
   const document = await TestModel.findById(NormalizeObjectId(id)).lean();
-  return document ? SerializeTest(document) : null;
+  return document;
 }
 
+// *************** EXPORT MODULE ***************
 module.exports = {
-  blocks: GetBlocks,
-  block: GetBlock,
-  subjects: GetSubjects,
-  subject: GetSubject,
-  tests: GetTests,
-  test: GetTest,
+  GetAllBlocks,
+  GetOneBlock,
+  GetAllSubjects,
+  GetOneSubject,
+  GetAllTests,
+  GetOneTest,
 };

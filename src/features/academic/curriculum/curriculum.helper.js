@@ -6,10 +6,21 @@ const { SubjectModel, TestModel } = require('./curriculum.model');
 const { AppError, ERROR_CODES } = require('../../../core/error');
 const { NormalizeObjectId } = require('../../../shared/utils/normalize_object_id');
 
+/**
+ * Round a weightage value to two decimal places.
+ * @param {Number} value
+ * @returns {Number}
+ */
 function RoundWeightage(total) {
 	return Math.round((total + Number.EPSILON) * 100) / 100;
 }
 
+/**
+ * Ensure total subject weightage for a block does not exceed 100.
+ * @param {String|mongoose.Types.ObjectId} blockId
+ * @param {Number} incomingWeightage
+ * @param {String|mongoose.Types.ObjectId} [excludeSubjectId]
+ */
 async function EnsureSubjectWeightageWithinLimit(blockId, incomingWeightage) {
 	// *************** START: Normalize identifiers and load existing subject weightages ***************
 	const blockObjectId = NormalizeObjectId(blockId);
@@ -32,9 +43,10 @@ async function EnsureSubjectWeightageWithinLimit(blockId, incomingWeightage) {
 }
 
 /**
- * Ensure total test weightage for a subject does not exceed 100 when adding a new test.
+ * Ensure total test weightage for a subject does not exceed 100.
  * @param {String|mongoose.Types.ObjectId} subjectId
  * @param {Number} incomingWeightage
+ * @param {String|mongoose.Types.ObjectId} [excludeTestId]
  */
 async function EnsureTestWeightageWithinLimit(subjectId, incomingWeightage) {
 	// *************** START: Normalize identifiers and load existing test weightages ***************
@@ -61,7 +73,12 @@ async function EnsureTestWeightageWithinLimit(subjectId, incomingWeightage) {
  * Relational locking: prevent updates/deletes if any student grades reference the entity.
  * entityType: 'block' | 'subject' | 'test'
  * entityId: string/ObjectId
+ *
+ * Ensure the specified curriculum entity is not referenced by any student grades.
+ * @param {'block'|'subject'|'test'} entityType
+ * @param {String|mongoose.Types.ObjectId} entityId
  */
+
 async function EnsureNoGradesLock(entityType, entityId) {
 	// *************** START: Normalize identifier and build grade lock query ***************
 	const db = mongoose.connection.db;

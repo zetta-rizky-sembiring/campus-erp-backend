@@ -1,281 +1,291 @@
 // *************** IMPORT MODULE ***************
 const { BlockModel, SubjectModel, TestModel } = require('./curriculum.model');
 const {
-	ValidateInput,
-	createBlockSchema,
-	updateBlockSchema,
-	createSubjectSchema,
-	updateSubjectSchema,
-	createTestSchema,
-	updateTestSchema,
+  ValidateInput,
+  CreateBlockSchema,
+  UpdateBlockSchema,
+  CreateSubjectSchema,
+  UpdateSubjectSchema,
+  CreateTestSchema,
+  UpdateTestSchema,
 } = require('./curriculum.validator');
 const {
-	EnsureSubjectWeightageWithinLimit,
-	EnsureTestWeightageWithinLimit,
-	EnsureNoGradesLock,
+  EnsureSubjectWeightageWithinLimit,
+  EnsureTestWeightageWithinLimit,
+  EnsureNoGradesLock,
 } = require('./curriculum.helper');
 const { AppError } = require('../../../core/error');
 const { NormalizeGqlError } = require('../../../shared/utils/normalize_gql_error');
-
-// *************** IMPORT LIBRARY ***************
-const mongoose = require('mongoose');
 const { NormalizeObjectId } = require('../../../shared/utils/normalize_object_id');
 
-// *************** IMPORT HELPER FUNCTION ***************
-function MapInputToDbPayload(payload = {}) {
-	const normalizedPayload = { ...payload };
-	const fieldMap = {
-		academicYear: 'academic_year',
-		blockId: 'block_id',
-		subjectId: 'subject_id',
-		gradingRules: 'grading_rules',
-	};
-
-	Object.entries(fieldMap).forEach(([fromField, toField]) => {
-		if (Object.prototype.hasOwnProperty.call(normalizedPayload, fromField)) {
-			normalizedPayload[toField] = normalizedPayload[fromField];
-			delete normalizedPayload[fromField];
-		}
-	});
-
-	return normalizedPayload;
-}
-
-function SerializeBlock(document) {
-	const data = document?.toObject ? document.toObject() : document;
-	return {
-		id: data._id ? data._id.toString() : data.id,
-		name: data.name,
-		academicYear: data.academic_year || data.academicYear,
-		gradingRules: (data.grading_rules || data.gradingRules || []).map((rule) => ({
-			label: rule.label,
-			operator: rule.operator,
-			threshold: rule.threshold,
-		})),
-	};
-}
-
-function SerializeSubject(document) {
-	const data = document?.toObject ? document.toObject() : document;
-	return {
-		id: data._id ? data._id.toString() : data.id,
-		name: data.name,
-		blockId: data.block_id ? data.block_id.toString() : data.blockId,
-		weightage: data.weightage,
-		gradingRules: (data.grading_rules || data.gradingRules || []).map((rule) => ({
-			label: rule.label,
-			operator: rule.operator,
-			threshold: rule.threshold,
-		})),
-	};
-}
-
-function SerializeTest(document) {
-	const data = document?.toObject ? document.toObject() : document;
-	return {
-		id: data._id ? data._id.toString() : data.id,
-		name: data.name,
-		subjectId: data.subject_id ? data.subject_id.toString() : data.subjectId,
-		weightage: data.weightage,
-		gradingRules: (data.grading_rules || data.gradingRules || []).map((rule) => ({
-			label: rule.label,
-			operator: rule.operator,
-			threshold: rule.threshold,
-		})),
-	};
-}
-
 // *************** MUTATION ***************
+
+/**
+ * Create a new block record.
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
 async function CreateBlockRecord(payload) {
-	const normalizedPayload = MapInputToDbPayload(payload);
-	const document = await BlockModel.create(normalizedPayload);
-	return SerializeBlock(document);
+  const document = await BlockModel.create(payload);
+  return document;
 }
 
+/**
+ * Update an existing block.
+ * @param {String|ObjectId} id
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
 async function UpdateBlockRecord(id, payload) {
-	const normalizedPayload = MapInputToDbPayload(payload);
-	const document = await BlockModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: normalizedPayload }, {
-		new: true,
-		runValidators: true,
-	});
+  const document = await BlockModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: payload }, {
+    new: true,
+    runValidators: true,
+  });
 
-	if (!document) {
-		throw new AppError('Block not found', 'NOT_FOUND', 404);
-	}
+  if (!document) {
+    throw new AppError('Block not found', 'NOT_FOUND', 404);
+  }
 
-	return SerializeBlock(document);
+  return document;
 }
 
+/**
+ * Delete a block after ensuring it is not referenced by student grades.
+ * @param {String|ObjectId} id
+ * @returns {Promise<Boolean>}
+ */
 async function DeleteBlockRecord(id) {
-	const objectId = NormalizeObjectId(id);
-	await EnsureNoGradesLock('block', objectId);
-	const result = await BlockModel.deleteOne({ _id: objectId });
-	return result.deletedCount > 0;
+  const objectId = NormalizeObjectId(id);
+  await EnsureNoGradesLock('block', objectId);
+  const result = await BlockModel.deleteOne({ _id: objectId });
+  return result.deletedCount > 0;
 }
 
+/**
+ * Create a new subject.
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
 async function CreateSubjectRecord(payload) {
-	const normalizedPayload = MapInputToDbPayload(payload);
-
-	// *************** START: Ensure block subject weightage remains within limit ***************
-	await EnsureSubjectWeightageWithinLimit(normalizedPayload.block_id, normalizedPayload.weightage);
-	// *************** END: Ensure block subject weightage remains within limit ***************
-
-	const document = await SubjectModel.create(normalizedPayload);
-	return SerializeSubject(document);
+  await EnsureSubjectWeightageWithinLimit(payload.block_id, payload.weightage);
+  const document = await SubjectModel.create(payload);
+  return document;
 }
 
+/**
+ * Update an existing subject.
+ * @param {String|ObjectId} id
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
 async function UpdateSubjectRecord(id, payload) {
-	const normalizedPayload = MapInputToDbPayload(payload);
-	const document = await SubjectModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: normalizedPayload }, {
-		new: true,
-		runValidators: true,
-	});
+  const document = await SubjectModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: payload }, {
+    new: true,
+    runValidators: true,
+  });
 
-	if (!document) {
-		throw new AppError('Subject not found', 'NOT_FOUND', 404);
-	}
+  if (!document) {
+    throw new AppError('Subject not found', 'NOT_FOUND', 404);
+  }
 
-	return SerializeSubject(document);
+  return document;
 }
 
+/**
+ * Delete a subject after ensuring it is not referenced by student grades.
+ * @param {String|ObjectId} id
+ * @returns {Promise<Boolean>}
+ */
 async function DeleteSubjectRecord(id) {
-	const objectId = NormalizeObjectId(id);
-	await EnsureNoGradesLock('subject', objectId);
-	const result = await SubjectModel.deleteOne({ _id: objectId });
-	return result.deletedCount > 0;
+  const objectId = NormalizeObjectId(id);
+  await EnsureNoGradesLock('subject', objectId);
+  const result = await SubjectModel.deleteOne({ _id: objectId });
+  return result.deletedCount > 0;
 }
 
+/**
+ * Create a new test.
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
 async function CreateTestRecord(payload) {
-	const normalizedPayload = MapInputToDbPayload(payload);
-
-	// *************** START: Ensure subject test weightage remains within limit ***************
-	await EnsureTestWeightageWithinLimit(normalizedPayload.subject_id, normalizedPayload.weightage);
-	// *************** END: Ensure subject test weightage remains within limit ***************
-
-	const document = await TestModel.create(normalizedPayload);
-	return SerializeTest(document);
+  await EnsureTestWeightageWithinLimit(payload.subject_id, payload.weightage);
+  const document = await TestModel.create(payload);
+  return document;
 }
 
+/**
+ * Update an existing test.
+ * @param {String|ObjectId} id
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
 async function UpdateTestRecord(id, payload) {
-	const normalizedPayload = MapInputToDbPayload(payload);
-	const document = await TestModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: normalizedPayload }, {
-		new: true,
-		runValidators: true,
-	});
+  const document = await TestModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: payload }, {
+    new: true,
+    runValidators: true,
+  });
 
-	if (!document) {
-		throw new AppError('Test not found', 'NOT_FOUND', 404);
-	}
+  if (!document) {
+    throw new AppError('Test not found', 'NOT_FOUND', 404);
+  }
 
-	return SerializeTest(document);
+  return document;
 }
 
+/**
+ * Delete a test after ensuring it is not referenced by student grades.
+ * @param {String|ObjectId} id
+ * @returns {Promise<Boolean>}
+ */
 async function DeleteTestRecord(id) {
-	const objectId = NormalizeObjectId(id);
-	await EnsureNoGradesLock('test', objectId);
-	const result = await TestModel.deleteOne({ _id: objectId });
-	return result.deletedCount > 0;
+  const objectId = NormalizeObjectId(id);
+  await EnsureNoGradesLock('test', objectId);
+  const result = await TestModel.deleteOne({ _id: objectId });
+  return result.deletedCount > 0;
 }
 
+/**
+ * Create a curriculum block.
+ * @param {Object} _
+ * @param {{ input: Object }} args
+ * @returns {Promise<Object>}
+ */
 async function CreateBlock(_, { input }) {
-	try {
-		// *************** START: Validate input payload ***************
-		const payload = ValidateInput(createBlockSchema, input);
-		// *************** END: Validate input payload ***************
-		return CreateBlockRecord(payload);
-	} catch (error) {
-		throw NormalizeGqlError(error);
-	}
+  try {
+    const payload = ValidateInput(CreateBlockSchema, input);
+    return CreateBlockRecord(payload);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
 }
 
+/**
+ * Update a curriculum block.
+ * @param {Object} _
+ * @param {{ id: String, input: Object }} args
+ * @returns {Promise<Object>}
+ */
 async function UpdateBlock(_, { id, input }) {
-	try {
-		// *************** START: Validate input payload ***************
-		const payload = ValidateInput(updateBlockSchema, input);
-		// *************** END: Validate input payload ***************
-		return UpdateBlockRecord(id, payload);
-	} catch (error) {
-		throw NormalizeGqlError(error);
-	}
+  try {
+    const payload = ValidateInput(UpdateBlockSchema, input);
+    return UpdateBlockRecord(id, payload);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
 }
 
+/**
+ * Delete a curriculum block.
+ * @param {Object} _
+ * @param {{ id: String }} args
+ * @returns {Promise<Boolean>}
+ */
 async function DeleteBlock(_, { id }) {
-	try {
-		return DeleteBlockRecord(id);
-	} catch (error) {
-		throw NormalizeGqlError(error);
-	}
+  try {
+    return DeleteBlockRecord(id);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
 }
 
+/**
+ * Create a curriculum subject.
+ * @param {Object} _
+ * @param {{ input: Object }} args
+ * @returns {Promise<Object>}
+ */
 async function CreateSubject(_, { input }) {
-	try {
-		// *************** START: Validate input payload ***************
-		const payload = ValidateInput(createSubjectSchema, input);
-		// *************** END: Validate input payload ***************
-		return CreateSubjectRecord(payload);
-	} catch (error) {
-		throw NormalizeGqlError(error);
-	}
+  try {
+    const payload = ValidateInput(CreateSubjectSchema, input);
+    return CreateSubjectRecord(payload);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
 }
 
+/**
+ * Update a curriculum subject.
+ * @param {Object} _
+ * @param {{ id: String, input: Object }} args
+ * @returns {Promise<Object>}
+ */
 async function UpdateSubject(_, { id, input }) {
-	try {
-		// *************** START: Validate input payload ***************
-		const payload = ValidateInput(updateSubjectSchema, input);
-		// *************** END: Validate input payload ***************
-		return UpdateSubjectRecord(id, payload);
-	} catch (error) {
-		throw NormalizeGqlError(error);
-	}
+  try {
+    const payload = ValidateInput(UpdateSubjectSchema, input);
+    return UpdateSubjectRecord(id, payload);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
 }
 
+/**
+ * Delete a curriculum subject.
+ * @param {Object} _
+ * @param {{ id: String }} args
+ * @returns {Promise<Boolean>}
+ */
 async function DeleteSubject(_, { id }) {
-	try {
-		return DeleteSubjectRecord(id);
-	} catch (error) {
-		throw NormalizeGqlError(error);
-	}
+  try {
+    return DeleteSubjectRecord(id);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
 }
 
+/**
+ * Create a curriculum test.
+ * @param {Object} _
+ * @param {{ input: Object }} args
+ * @returns {Promise<Object>}
+ */
 async function CreateTest(_, { input }) {
-	try {
-		// *************** START: Validate input payload ***************
-		const payload = ValidateInput(createTestSchema, input);
-		// *************** END: Validate input payload ***************
-		return CreateTestRecord(payload);
-	} catch (error) {
-		throw NormalizeGqlError(error);
-	}
+  try {
+    const payload = ValidateInput(CreateTestSchema, input);
+    return CreateTestRecord(payload);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
 }
 
+/**
+ * Update a curriculum test.
+ * @param {Object} _
+ * @param {{ id: String, input: Object }} args
+ * @returns {Promise<Object>}
+ */
 async function UpdateTest(_, { id, input }) {
-	try {
-		// *************** START: Validate input payload ***************
-		const payload = ValidateInput(updateTestSchema, input);
-		// *************** END: Validate input payload ***************
-		return UpdateTestRecord(id, payload);
-	} catch (error) {
-		throw NormalizeGqlError(error);
-	}
+  try {
+    const payload = ValidateInput(UpdateTestSchema, input);
+    return UpdateTestRecord(id, payload);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
 }
 
+/**
+ * Delete a curriculum test.
+ * @param {Object} _
+ * @param {{ id: String }} args
+ * @returns {Promise<Boolean>}
+ */
 async function DeleteTest(_, { id }) {
-	try {
-		return DeleteTestRecord(id);
-	} catch (error) {
-		throw NormalizeGqlError(error);
-	}
+  try {
+    return DeleteTestRecord(id);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
 }
 
 // *************** EXPORT MODULE ***************
 module.exports = {
-	createBlock: CreateBlock,
-	updateBlock: UpdateBlock,
-	deleteBlock: DeleteBlock,
-	createSubject: CreateSubject,
-	updateSubject: UpdateSubject,
-	deleteSubject: DeleteSubject,
-	createTest: CreateTest,
-	updateTest: UpdateTest,
-	deleteTest: DeleteTest,
+  CreateBlock,
+  UpdateBlock,
+  DeleteBlock,
+  CreateSubject,
+  UpdateSubject,
+  DeleteSubject,
+  CreateTest,
+  UpdateTest,
+  DeleteTest,
 };

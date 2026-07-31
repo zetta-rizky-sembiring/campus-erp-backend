@@ -15,86 +15,86 @@ module.exports = `
   type Block {
     id: ID!
     name: String!
-    academicYear: String!
-    gradingRules: [GradingRule!]!
+    academic_year: String!
+    grading_rules: [GradingRule!]!
   }
 
   input CreateBlockInput {
     name: String!
-    academicYear: String!
-    gradingRules: [GradingRuleInput!]
+    academic_year: String!
+    grading_rules: [GradingRuleInput!]
   }
 
   input UpdateBlockInput {
     name: String
-    academicYear: String
-    gradingRules: [GradingRuleInput!]
+    academic_year: String
+    grading_rules: [GradingRuleInput!]
   }
 
   type Subject {
     id: ID!
     name: String!
-    blockId: ID!
+    block_id: ID!
     weightage: Float!
-    gradingRules: [GradingRule!]!
+    grading_rules: [GradingRule!]!
   }
 
   input CreateSubjectInput {
     name: String!
-    blockId: ID!
+    block_id: ID!
     weightage: Float!
-    gradingRules: [GradingRuleInput!]
+    grading_rules: [GradingRuleInput!]
   }
 
   input UpdateSubjectInput {
     name: String
-    blockId: ID
+    block_id: ID
     weightage: Float
-    gradingRules: [GradingRuleInput!]
+    grading_rules: [GradingRuleInput!]
   }
 
   type Test {
     id: ID!
     name: String!
-    subjectId: ID!
+    subject_id: ID!
     weightage: Float!
-    gradingRules: [GradingRule!]!
+    grading_rules: [GradingRule!]!
   }
 
   input CreateTestInput {
     name: String!
-    subjectId: ID!
+    subject_id: ID!
     weightage: Float!
-    gradingRules: [GradingRuleInput!]
+    grading_rules: [GradingRuleInput!]
   }
 
   input UpdateTestInput {
     name: String
-    subjectId: ID
+    subject_id: ID
     weightage: Float
-    gradingRules: [GradingRuleInput!]
+    grading_rules: [GradingRuleInput!]
   }
 
   type Query {
-    blocks: [Block!]!
-    block(id: ID!): Block
-    subjects: [Subject!]!
-    subject(id: ID!): Subject
-    tests: [Test!]!
-    test(id: ID!): Test
+    GetAllBlocks: [Block!]!
+    GetOneBlock(id: ID!): Block
+    GetAllSubjects: [Subject!]!
+    GetOneSubject(id: ID!): Subject
+    GetAllTests: [Test!]!
+    GetOneTest(id: ID!): Test
   }
 
   type Mutation {
-    createBlock(input: CreateBlockInput!): Block!
-    updateBlock(id: ID!, input: UpdateBlockInput!): Block!
-    deleteBlock(id: ID!): Boolean!
+    CreateBlock(input: CreateBlockInput!): Block!
+    UpdateBlock(id: ID!, input: UpdateBlockInput!): Block!
+    DeleteBlock(id: ID!): Boolean!
 
-    createSubject(input: CreateSubjectInput!): Subject!
-    updateSubject(id: ID!, input: UpdateSubjectInput!): Subject!
-    deleteSubject(id: ID!): Boolean!
+    CreateSubject(input: CreateSubjectInput!): Subject!
+    UpdateSubject(id: ID!, input: UpdateSubjectInput!): Subject!
+    DeleteSubject(id: ID!): Boolean!
 
-    createTest(input: CreateTestInput!): Test!
-    updateTest(id: ID!, input: UpdateTestInput!): Test!
-    deleteTest(id: ID!): Boolean!
+    CreateTest(input: CreateTestInput!): Test!
+    UpdateTest(id: ID!, input: UpdateTestInput!): Test!
+    DeleteTest(id: ID!): Boolean!
   }
 `;

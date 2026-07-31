@@ -2,59 +2,53 @@
 const Joi = require('joi');
 
 // *************** IMPORT VALIDATOR ***************
-const gradingRuleSchema = Joi.object({
+const GradingRuleSchema = Joi.object({
   label: Joi.string().trim().required(),
   operator: Joi.string().valid('>', '>=', '<', '<=', '==').required(),
   threshold: Joi.number().strict().required(),
 }).unknown(false);
 
-const gradingRulesSchema = Joi.array().items(gradingRuleSchema).optional();
-const weightageSchema = Joi.number().strict().greater(0).max(100).required();
+const GradingRulesSchema = Joi.array().items(GradingRuleSchema).optional();
+const WeightageSchema = Joi.number().strict().greater(0).max(100).required();
 
-const createBlockSchema = Joi.object({
+const CreateBlockSchema = Joi.object({
   name: Joi.string().trim().required(),
-  academicYear: Joi.string().trim().required(),
-  gradingRules: gradingRulesSchema,
-  grading_rules: gradingRulesSchema,
+  academic_year: Joi.string().trim().required(),
+  grading_rules: GradingRulesSchema,
 }).unknown(false);
 
-const updateBlockSchema = Joi.object({
+const UpdateBlockSchema = Joi.object({
   name: Joi.string().trim().optional(),
-  academicYear: Joi.string().trim().optional(),
-  gradingRules: gradingRulesSchema,
-  grading_rules: gradingRulesSchema,
+  academic_year: Joi.string().trim().optional(),
+  grading_rules: GradingRulesSchema,
 }).unknown(false);
 
-const createSubjectSchema = Joi.object({
+const CreateSubjectSchema = Joi.object({
   name: Joi.string().trim().required(),
-  blockId: Joi.string().trim().required(),
-  weightage: weightageSchema,
-  gradingRules: gradingRulesSchema,
-  grading_rules: gradingRulesSchema,
+  block_id: Joi.string().trim().required(),
+  weightage: WeightageSchema,
+  grading_rules: GradingRulesSchema,
 }).unknown(false);
 
-const updateSubjectSchema = Joi.object({
+const UpdateSubjectSchema = Joi.object({
   name: Joi.string().trim().optional(),
-  blockId: Joi.string().trim().optional(),
-  weightage: weightageSchema.optional(),
-  gradingRules: gradingRulesSchema,
-  grading_rules: gradingRulesSchema,
+  block_id: Joi.string().trim().optional(),
+  weightage: WeightageSchema.optional(),
+  grading_rules: GradingRulesSchema,
 }).unknown(false);
 
-const createTestSchema = Joi.object({
+const CreateTestSchema = Joi.object({
   name: Joi.string().trim().required(),
-  subjectId: Joi.string().trim().required(),
-  weightage: weightageSchema,
-  gradingRules: gradingRulesSchema,
-  grading_rules: gradingRulesSchema,
+  subject_id: Joi.string().trim().required(),
+  weightage: WeightageSchema,
+  grading_rules: GradingRulesSchema,
 }).unknown(false);
 
-const updateTestSchema = Joi.object({
+const UpdateTestSchema = Joi.object({
   name: Joi.string().trim().optional(),
-  subjectId: Joi.string().trim().optional(),
-  weightage: weightageSchema.optional(),
-  gradingRules: gradingRulesSchema,
-  grading_rules: gradingRulesSchema,
+  subject_id: Joi.string().trim().optional(),
+  weightage: WeightageSchema.optional(),
+  grading_rules: GradingRulesSchema,
 }).unknown(false);
 
 const ValidateInput = (schema, payload) => {
@@ -73,13 +67,13 @@ const ValidateInput = (schema, payload) => {
 
 // *************** EXPORT MODULE ***************
 module.exports = {
-  gradingRuleSchema,
-  weightageSchema,
-  createBlockSchema,
-  updateBlockSchema,
-  createSubjectSchema,
-  updateSubjectSchema,
-  createTestSchema,
-  updateTestSchema,
+  GradingRuleSchema,
+  WeightageSchema,
+  CreateBlockSchema,
+  UpdateBlockSchema,
+  CreateSubjectSchema,
+  UpdateSubjectSchema,
+  CreateTestSchema,
+  UpdateTestSchema,
   ValidateInput,
 };
