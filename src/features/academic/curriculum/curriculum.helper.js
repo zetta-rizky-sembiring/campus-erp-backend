@@ -2,9 +2,187 @@
 const mongoose = require('mongoose');
 
 // *************** IMPORT MODULE ***************
-const { SubjectModel, TestModel } = require('./curriculum.model');
+const { BlockModel, SubjectModel, TestModel } = require('./curriculum.model');
 const { AppError, ERROR_CODES } = require('../../../core/error');
+
+// *************** IMPORT UTILITIES ***************
 const { NormalizeObjectId } = require('../../../shared/utils/normalize_object_id');
+
+/**
+ * Retrieve all curriculum blocks.
+ * @returns {Promise<Object[]>} A list of curriculum block documents.
+ */
+async function GetAllBlocksHelper(){
+	return await BlockModel.find().lean();
+}
+
+/**
+ * Retrieve a curriculum block by its identifier.
+ * @param {String} id - The curriculum block identifier.
+ * @returns {Promise<Object|null>} The matching curriculum block document, or null if not found.
+ */
+async function GetOneBlockHelper(id){
+	return await BlockModel.findById(NormalizeObjectId(id)).lean();
+}
+
+/**
+ * Retrieve all curriculum subjects.
+ * @returns {Promise<Object[]>} A list of curriculum subject documents.
+ */
+async function GetAllSubjectsHelper(){
+	return await SubjectModel.find().lean();
+}
+
+/**
+ * Retrieve a curriculum subject by its identifier.
+ * @param {String} id - The curriculum subject identifier.
+ * @returns {Promise<Object|null>} The matching curriculum subject document, or null if not found.
+ */
+async function GetOneSubjectHelper(id){
+	return await SubjectModel.findById(NormalizeObjectId(id)).lean();
+}
+
+/**
+ * Retrieve all curriculum tests.
+ * @returns {Promise<Object[]>} A list of curriculum test documents.
+ */
+async function GetAllTestsHelper(){
+	return await TestModel.find().lean();
+}
+
+/**
+ * Retrieve a curriculum test by its identifier.
+ * @param {String} id - The curriculum test identifier.
+ * @returns {Promise<Object|null>} The matching curriculum test document, or null if not found.
+ */
+async function GetOneTestHelper(id){
+	return await TestModel.findById(NormalizeObjectId(id)).lean();
+}
+
+/**
+ * Create a new block record.
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
+async function CreateBlockRecord(payload) {
+  const document = await BlockModel.create(payload);
+  return document;
+}
+
+/**
+ * Update an existing block.
+ * @param {String|ObjectId} id
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
+async function UpdateBlockRecord(id, payload) {
+  const document = await BlockModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: payload }, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!document) {
+    throw new AppError('Block not found', 'NOT_FOUND', 404);
+  }
+
+  return document;
+}
+
+/**
+ * Delete a block after ensuring it is not referenced by student grades.
+ * @param {String|ObjectId} id
+ * @returns {Promise<Boolean>}
+ */
+async function DeleteBlockRecord(id) {
+  const objectId = NormalizeObjectId(id);
+  await EnsureNoGradesLock('block', objectId);
+  const result = await BlockModel.deleteOne({ _id: objectId });
+  return result.deletedCount > 0;
+}
+
+/**
+ * Create a new subject.
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
+async function CreateSubjectRecord(payload) {
+  await EnsureSubjectWeightageWithinLimit(payload.block_id, payload.weightage);
+  const document = await SubjectModel.create(payload);
+  return document;
+}
+
+/**
+ * Update an existing subject.
+ * @param {String|ObjectId} id
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
+async function UpdateSubjectRecord(id, payload) {
+  const document = await SubjectModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: payload }, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!document) {
+    throw new AppError('Subject not found', 'NOT_FOUND', 404);
+  }
+
+  return document;
+}
+
+/**
+ * Delete a subject after ensuring it is not referenced by student grades.
+ * @param {String|ObjectId} id
+ * @returns {Promise<Boolean>}
+ */
+async function DeleteSubjectRecord(id) {
+  const objectId = NormalizeObjectId(id);
+  await EnsureNoGradesLock('subject', objectId);
+  const result = await SubjectModel.deleteOne({ _id: objectId });
+  return result.deletedCount > 0;
+}
+
+/**
+ * Create a new test.
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
+async function CreateTestRecord(payload) {
+  await EnsureTestWeightageWithinLimit(payload.subject_id, payload.weightage);
+  const document = await TestModel.create(payload);
+  return document;
+}
+
+/**
+ * Update an existing test.
+ * @param {String|ObjectId} id
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
+async function UpdateTestRecord(id, payload) {
+  const document = await TestModel.findByIdAndUpdate(NormalizeObjectId(id), { $set: payload }, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!document) {
+    throw new AppError('Test not found', 'NOT_FOUND', 404);
+  }
+
+  return document;
+}
+
+/**
+ * Delete a test after ensuring it is not referenced by student grades.
+ * @param {String|ObjectId} id
+ * @returns {Promise<Boolean>}
+ */
+async function DeleteTestRecord(id) {
+  const objectId = NormalizeObjectId(id);
+  await EnsureNoGradesLock('test', objectId);
+  const result = await TestModel.deleteOne({ _id: objectId });
+  return result.deletedCount > 0;
+}
 
 /**
  * Round a weightage value to two decimal places.
@@ -105,8 +283,19 @@ async function EnsureNoGradesLock(entityType, entityId) {
 
 // *************** EXPORT MODULE ***************
 module.exports = {
-	EnsureSubjectWeightageWithinLimit,
-	EnsureTestWeightageWithinLimit,
-	EnsureNoGradesLock,
+	GetAllBlocksHelper,
+	GetOneBlockHelper,
+	GetAllSubjectsHelper,
+	GetOneSubjectHelper,
+	GetAllTestsHelper,
+	GetOneTestHelper,
+	CreateBlockRecord,
+	UpdateBlockRecord,
+	DeleteBlockRecord,
+	CreateSubjectRecord,
+	UpdateSubjectRecord,
+	DeleteSubjectRecord,
+	CreateTestRecord,
+	UpdateTestRecord,
+	DeleteTestRecord
 };
-
