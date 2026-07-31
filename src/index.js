@@ -10,6 +10,11 @@ require('./core/db');
 const server = require('./core/apollo');
 
 // *************** MUTATION ***************
+/**
+ * Start the Express server and integrate Apollo Server for GraphQL.
+ * 
+ * @returns {Promise<void>} Resolves when the server is listening.
+ */
 async function StartServer() {
   const app = express();
 

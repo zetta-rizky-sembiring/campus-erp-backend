@@ -4,6 +4,8 @@ const { AppError } = require('../../core/error');
 // *************** IMPORT UTILITIES ***************
 /**
  * Normalize various error shapes into GraphQL-friendly error objects
+ * @param {Error|AppError} error - The error to normalize.
+ * @returns {Error} Normalized GraphQL error with extensions metadata.
  */
 function NormalizeGqlError(error) {
 	// *************** START: Pass-through if already normalized ***************

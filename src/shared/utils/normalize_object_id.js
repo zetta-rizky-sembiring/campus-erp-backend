@@ -2,7 +2,12 @@
 const mongoose = require('mongoose');
 
 // *************** IMPORT UTILITIES ***************
-// Utility to normalize various id forms into a mongoose ObjectId when appropriate
+
+/**
+* Utility to normalize various id forms into a mongoose ObjectId when appropriate
+* @param {String|mongoose.Types.ObjectId} id - The identifier to normalize.
+* @returns {mongoose.Types.ObjectId|String} Normalized ObjectId or original id if not convertible.
+*/
 function NormalizeObjectId(id) {
 	// *************** START: Handle empty or already-normalized ids ***************
 	if (!id) return id;
