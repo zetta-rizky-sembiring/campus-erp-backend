@@ -10,7 +10,12 @@ require('./core/db');
 const server = require('./core/apollo');
 
 // *************** MUTATION ***************
-async function startServer() {
+/**
+ * Start the Express server and integrate Apollo Server for GraphQL.
+ * 
+ * @returns {Promise<void>} Resolves when the server is listening.
+ */
+async function StartServer() {
   const app = express();
 
   app.use(cors());
@@ -30,7 +35,7 @@ async function startServer() {
 }
 
 // *************** EXPORT MODULE ***************
-startServer().catch((err) => {
+StartServer().catch((err) => {
   console.error(err);
   process.exit(1);
 });
