@@ -13,8 +13,6 @@ const server = new ApolloServer({
     {
       Query: curriculum.queryResolvers,
       Mutation: curriculum.mutationResolvers,
-
-      ...curriculum.typeResolvers,
     },
   ],
 });

@@ -13,7 +13,7 @@ module.exports = `
   }
 
   type Block {
-    id: ID!
+    _id: ID!
     name: String!
     academic_year: String!
     grading_rules: [GradingRule!]!
@@ -32,7 +32,7 @@ module.exports = `
   }
 
   type Subject {
-    id: ID!
+    _id: ID!
     name: String!
     block_id: ID!
     weightage: Float!
@@ -54,7 +54,7 @@ module.exports = `
   }
 
   type Test {
-    id: ID!
+    _id: ID!
     name: String!
     subject_id: ID!
     weightage: Float!
