@@ -2,13 +2,13 @@
 module.exports = `
   type GradingRule {
     label: String!
-    operator: GradingRuleOperator!
+    operator: String!
     threshold: Float!
   }
 
   input GradingRuleInput {
     label: String!
-    operator: GradingRuleOperator!
+    operator: String!
     threshold: Float!
   }
 
