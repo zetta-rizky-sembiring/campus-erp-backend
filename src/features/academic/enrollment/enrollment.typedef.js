@@ -1,11 +1,17 @@
 // *************** EXPORT MODULE ***************
 module.exports = `
+  enum AcademicYearStatus {
+    ACTIVE
+    COMPLETED
+    ARCHIVED
+  }
+    
   type AcademicYear {
     _id: ID!
     name: String!
     start_date: String!
     end_date: String!
-    status: String!
+    status: AcademicYearStatus!
     block_ids: [ID!]!
     student_ids: [ID!]
   }
