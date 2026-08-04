@@ -18,13 +18,12 @@ const {
   DeleteSubjectRecord,
   CreateTestRecord,
   UpdateTestRecord,
-  DeleteTestRecord
+  DeleteTestRecord,
 } = require('./curriculum.helper');
 const { AppError } = require('../../../core/error');
 
 // *************** IMPORT UTILITIES ***************
 const { NormalizeGqlError } = require('../../../shared/utils/normalize_gql_error');
-
 
 /**
  * Create a curriculum block.

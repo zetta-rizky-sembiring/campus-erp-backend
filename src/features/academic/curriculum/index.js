@@ -5,7 +5,7 @@ const queryResolvers = require('./curriculum.query.resolver');
 
 // *************** EXPORT MODULE ***************
 module.exports = {
-    typeDefs,
-    mutationResolvers,
-    queryResolvers,
-}
+  typeDefs,
+  mutationResolvers,
+  queryResolvers,
+};

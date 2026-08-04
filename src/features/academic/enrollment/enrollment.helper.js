@@ -1,4 +1,4 @@
-// *************** IMPORT MODELS ***************
+// *************** IMPORT MODULE ***************
 const { AcademicYearModel } = require('./academic_year.model');
 const { StudentModel } = require('../../users/student/student.model');
 const { AppError } = require('../../../core/error');
@@ -7,7 +7,6 @@ const { AppError } = require('../../../core/error');
 const { NormalizeObjectId } = require('../../../shared/utils/normalize_object_id');
 
 // *************** MUTATION ***************
-
 /**
  * Enrolls one or more students into an active academic year and
  * synchronizes the relationship on both academic year and student documents.
@@ -20,75 +19,62 @@ const { NormalizeObjectId } = require('../../../shared/utils/normalize_object_id
  * @throws {AppError} 400 - Academic year is closed or student reference is invalid.
  */
 async function EnrollStudentsHelper(input) {
+  // ***************Normalize identifiers and validate enrollment target and student references
+  const academicYearId = NormalizeObjectId(input.academic_year_id);
+  const studentIds = (input.student_ids || []).map((id) => NormalizeObjectId(id));
 
-    // *************** START: Normalize incoming identifiers ***************
-    const academicYearId = NormalizeObjectId(input.academic_year_id);
-    const studentIds = (input.student_ids || []).map((id) => NormalizeObjectId(id));
-    // *************** END: Normalize incoming identifiers ***************
+  // *************** START: Validate enrollment target ***************
+  const academicYear = await AcademicYearModel.findById(academicYearId);
 
+  if (!academicYear) {
+    throw new AppError('Academic year not found', 'NOT_FOUND', 404);
+  }
 
-    // *************** START: Validate enrollment target ***************
-    const academicYear = await AcademicYearModel.findById(academicYearId);
+  if (academicYear.status !== 'ACTIVE') {
+    throw new AppError('Academic year is closed to new enrollments', 'ACADEMIC_YEAR_CLOSED', 400);
+  }
+  // *************** END: Validate enrollment target ***************
 
-    if (!academicYear) {
-        throw new AppError('Academic year not found', 'NOT_FOUND', 404);
-    }
+  // *************** START: Validate student references ***************
+  const matchedStudentCount = await StudentModel.countDocuments({
+    _id: { $in: studentIds },
+  });
 
-    if (academicYear.status !== 'active') {
-        throw new AppError(
-            'Academic year is closed to new enrollments',
-            'ACADEMIC_YEAR_CLOSED',
-            400
-        );
-    }
-    // *************** END: Validate enrollment target ***************
+  if (matchedStudentCount !== studentIds.length) {
+    throw new AppError('Invalid or deleted student reference(s)', 'INVALID_STUDENT_REFERENCE', 400);
+  }
+  // *************** END: Validate student references ***************
 
+  // *************** START: Synchronize enrollment relationship ***************
 
-    // *************** START: Validate student references ***************
-    const matchedStudentCount = await StudentModel.countDocuments({
-        _id: { $in: studentIds },
-    });
-
-    if (matchedStudentCount !== studentIds.length) {
-        throw new AppError(
-            'Invalid or deleted student reference(s)',
-            'INVALID_STUDENT_REFERENCE',
-            400
-        );
-    }
-    // *************** END: Validate student references ***************
-
-
-    // *************** START: Synchronize enrollment relationship ***************
-
-    // *************** Register students under the academic year document
-    const updatedYear = await AcademicYearModel.findByIdAndUpdate(
-        academicYearId,
-        {
-            $addToSet: {
-                student_ids: {
-                    $each: studentIds,
-                },
-            },
+  // *************** Register students under the academic year document
+  const updatedYear = await AcademicYearModel.findByIdAndUpdate(
+    academicYearId,
+    {
+      $addToSet: {
+        student_ids: {
+          $each: studentIds,
         },
-        { new: true }
-    );
+      },
+    },
+    { new: true },
+  );
 
-    // *************** Also updates each student's academic_year_ids reference
-    await StudentModel.updateMany(
-        {
-            _id: { $in: studentIds },
-        },
-        {
-            $addToSet: {
-                academic_year_ids: academicYearId,
-            },
-        }
-    );
+  // *************** Also updates each student's academic_year_ids reference
+  await StudentModel.updateMany(
+    {
+      _id: { $in: studentIds },
+    },
+    {
+      $addToSet: {
+        academic_year_ids: academicYearId,
+      },
+    },
+  );
 
-    // *************** END: Synchronize enrollment relationship ***************
+  // *************** END: Synchronize enrollment relationship ***************
 
-    return updatedYear;
+  return updatedYear;
 }
 
 /**
@@ -100,18 +86,17 @@ async function EnrollStudentsHelper(input) {
  * @throws {AppError} Propagates validation and enrollment errors from EnrollStudentsHelper.
  */
 async function EnrollStudentHelper(student_id, academic_year_id) {
+  // *************** Delegate single enrollment through the batch enrollment workflow
+  const input = {
+    academic_year_id,
+    student_ids: [student_id],
+  };
 
-    // *************** Delegate single enrollment through the batch enrollment workflow
-    const input = {
-        academic_year_id,
-        student_ids: [student_id],
-    };
-
-    return await EnrollStudentsHelper(input);
+  return await EnrollStudentsHelper(input);
 }
 
 // *************** EXPORT MODULE ***************
 module.exports = {
-    EnrollStudentHelper,
-    EnrollStudentsHelper,
+  EnrollStudentHelper,
+  EnrollStudentsHelper,
 };

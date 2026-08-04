@@ -26,6 +26,6 @@ const ValidateInput = (schema, payload) => {
 
 // *************** EXPORT MODULE ***************
 module.exports = {
-    CreateStudentSchema,
-    ValidateInput
+  CreateStudentSchema,
+  ValidateInput,
 };

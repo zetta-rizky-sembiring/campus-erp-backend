@@ -20,5 +20,5 @@ async function GetAllStudents() {
 
 // *************** EXPORT MODULE ***************
 module.exports = {
-    GetAllStudents,
-}
+  GetAllStudents,
+};

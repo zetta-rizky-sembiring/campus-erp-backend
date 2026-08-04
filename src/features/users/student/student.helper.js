@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 // *************** IMPORT MODULE ***************
 const { StudentModel } = require('./student.model');
-const { AppError,  ERROR_CODES } = require('../../../core/error');
+const { AppError, ERROR_CODES } = require('../../../core/error');
 
 // *************** IMPORT UTILITIES ***************
 const { NormalizeObjectId } = require('../../../shared/utils/normalize_object_id');
@@ -31,7 +31,7 @@ async function CreateStudentHelper(studentData) {
  * @returns {Array} An array of student records.
  */
 async function GetAllStudentsHelper() {
-    return await StudentModel.find().lean();
+  return await StudentModel.find().lean();
 }
 
 // *************** EXPORT MODULE ***************

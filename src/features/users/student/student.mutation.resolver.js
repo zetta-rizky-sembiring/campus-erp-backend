@@ -19,16 +19,13 @@ const { NormalizeGqlError } = require('../../../shared/utils/normalize_gql_error
  */
 async function CreateStudent(_, { input }) {
   try {
-
     // *************** START: Validate mutation payload ***************
     const payload = ValidateInput(CreateStudentSchema, input);
     // *************** END: Validate mutation payload ***************
 
-
     // *************** START: Execute student creation workflow ***************
     return await CreateStudentHelper(payload);
     // *************** END: Execute student creation workflow ***************
-
   } catch (error) {
     throw NormalizeGqlError(error);
   }

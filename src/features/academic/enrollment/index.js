@@ -4,6 +4,6 @@ const mutationResolvers = require('./enrollment.mutation.resolver');
 
 // *************** EXPORT MODULE ***************
 module.exports = {
-    typeDefs,
-    mutationResolvers,
-}
+  typeDefs,
+  mutationResolvers,
+};

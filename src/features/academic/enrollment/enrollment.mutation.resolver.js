@@ -18,23 +18,16 @@ const { NormalizeGqlError } = require('../../../shared/utils/normalize_gql_error
  * @returns {Promise<Object>} Updated academic year document.
  */
 async function EnrollStudent(_, { input }) {
-    try {
+  try {
+    // *************** Validate enrollment payload ***************
+    const payload = ValidateInput(CreateEnrollmentSchema, input);
 
-        // *************** START: Validate mutation payload ***************
-        const payload = ValidateInput(CreateEnrollmentSchema, input);
-        // *************** END: Validate mutation payload ***************
-
-
-        // *************** START: Execute enrollment workflow ***************
-        return await EnrollStudentHelper(
-            payload.student_id,
-            payload.academic_year_id
-        );
-        // *************** END: Execute enrollment workflow ***************
-
-    } catch (error) {
-        throw NormalizeGqlError(error);
-    }
+    // *************** Execute single student enrollment workflow ***************
+    return await EnrollStudentHelper(payload.student_id, payload.academic_year_id);
+  } catch (error) {
+    // *************** Normalize and forward enrollment errors ***************
+    throw NormalizeGqlError(error);
+  }
 }
 
 /**
@@ -46,24 +39,20 @@ async function EnrollStudent(_, { input }) {
  * @returns {Promise<Object>} Updated academic year document.
  */
 async function EnrollStudentsToYear(_, { input }) {
-    try {
+  try {
+    // *************** Validate batch enrollment payload ***************
+    const payload = ValidateInput(CreateEnrollmentSchema, input);
 
-        // *************** START: Validate mutation payload ***************
-        const payload = ValidateInput(CreateEnrollmentSchema, input);
-        // *************** END: Validate mutation payload ***************
-
-
-        // *************** START: Execute batch enrollment workflow ***************
-        return await EnrollStudentsHelper(payload);
-        // *************** END: Execute batch enrollment workflow ***************
-
-    } catch (error) {
-        throw NormalizeGqlError(error);
-    }
+    // *************** Execute bulk enrollment workflow ***************
+    return await EnrollStudentsHelper(payload);
+  } catch (error) {
+    // *************** Normalize and forward batch enrollment errors ***************
+    throw NormalizeGqlError(error);
+  }
 }
 
 // *************** EXPORT MODULE ***************
 module.exports = {
-    EnrollStudent,
-    EnrollStudentsToYear,
+  EnrollStudent,
+  EnrollStudentsToYear,
 };
