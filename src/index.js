@@ -12,7 +12,7 @@ const server = require('./core/apollo');
 // *************** MUTATION ***************
 /**
  * Start the Express server and integrate Apollo Server for GraphQL.
- * 
+ *
  * @returns {Promise<void>} Resolves when the server is listening.
  */
 async function StartServer() {
@@ -23,10 +23,7 @@ async function StartServer() {
 
   await server.start();
 
-  app.use(
-    '/graphql',
-    expressMiddleware(server)
-  );
+  app.use('/graphql', expressMiddleware(server));
 
   app.listen(config.port, () => {
     console.log(`Server running at http://localhost:${config.port}`);

@@ -1,13 +1,13 @@
 // *************** IMPORT MODULE ***************
 const { BlockModel, SubjectModel, TestModel } = require('./curriculum.model');
-const { 
-  GetAllBlocksHelper, 
-  GetOneBlockHelper, 
+const {
+  GetAllBlocksHelper,
+  GetOneBlockHelper,
   GetAllSubjectsHelper,
   GetOneSubjectHelper,
   GetAllTestsHelper,
   GetOneTestHelper,
-  } = require('./curriculum.helper');
+} = require('./curriculum.helper');
 
 // *************** IMPORT UTILITIES ***************
 const { NormalizeGqlError, NormalizeObjectId } = require('../../../shared/utils/normalize_object_id');
@@ -35,7 +35,7 @@ async function GetOneBlock(_, { id }) {
   try {
     return await GetOneBlockHelper(id);
   } catch (error) {
-    throw NormalizeGqlError(error)
+    throw NormalizeGqlError(error);
   }
 }
 
@@ -61,7 +61,7 @@ async function GetOneSubject(_, { id }) {
   try {
     return await GetOneSubjectHelper(id);
   } catch (error) {
-    throw NormalizeGqlError(error)
+    throw NormalizeGqlError(error);
   }
 }
 
@@ -87,7 +87,7 @@ async function GetOneTest(_, { id }) {
   try {
     return await GetOneTestHelper(id);
   } catch (error) {
-    throw NormalizeGqlError(error)
+    throw NormalizeGqlError(error);
   }
 }
 

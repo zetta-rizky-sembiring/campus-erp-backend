@@ -24,7 +24,7 @@ const GradingRuleSchema = new Schema(
       required: true,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 /**
