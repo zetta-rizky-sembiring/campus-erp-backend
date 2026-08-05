@@ -24,6 +24,12 @@ const GetStudentsByAcademicYearSchema = Joi.object({
 }).unknown(false);
 
 // *************** IMPORT HELPER FUNCTION ***************
+/**
+ * Validates the input payload against the provided schema.
+ * @param {Object} schema - The Joi schema to validate against.
+ * @param {Object} payload - The input payload to validate.
+ * @returns {Object} The validated payload.
+ */
 const ValidateInput = (schema, payload) => {
   const { error, value } = schema.validate(payload, {
     abortEarly: false,

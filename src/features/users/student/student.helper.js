@@ -70,8 +70,6 @@ async function GetStudentsByAcademicYearHelper(payload) {
     ];
   }
 
-  console.log('[DB] Student.aggregate()');
-
   // *************** Stage 2($facet) - Perform aggregation with pagination and total count
   const [result] = await StudentModel.aggregate([
     {

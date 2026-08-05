@@ -11,7 +11,6 @@ const { AcademicYearModel } = require('../features/academic/enrollment/academic_
  */
 function CreateAcademicYearLoader() {
   return new DataLoader(async (academicYearIds) => {
-    console.log('[DB] AcademicYear.find()', academicYearIds);
     const academicYears = await AcademicYearModel.find({
       _id: {
         $in: academicYearIds,
