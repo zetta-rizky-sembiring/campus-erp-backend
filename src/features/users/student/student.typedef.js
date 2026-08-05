@@ -8,6 +8,7 @@ module.exports = `
     student_number: String!
     registration_date: String!
     academic_year_ids: [ID!]!
+    academic_years: [AcademicYear!]!
   }
 
   input CreateStudentInput {
@@ -16,10 +17,25 @@ module.exports = `
     email: String!
     student_number: String!
     registration_date: String
-}
+  }
+  
+  type PaginatedStudentResponse {
+    total_count: Int!
+    current_page: Int!
+    total_pages: Int!
+    data: [Student!]!
+  }
+
+  input GetStudentsByAcademicYearInput {
+    academic_year_id: ID!
+    page: Int
+    limit: Int
+    search: String
+  }
 
   type Query {
     GetAllStudents: [Student!]
+    GetStudentsByAcademicYear(input: GetStudentsByAcademicYearInput!): PaginatedStudentResponse!
   }
 
   type Mutation {

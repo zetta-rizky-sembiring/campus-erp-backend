@@ -1,13 +1,16 @@
 // *************** IMPORT MODULE ***************
-const { StudentModel } = require('./student.model');
-const { GetAllStudentsHelper } = require('./student.helper');
+const { GetAllStudentsHelper, GetStudentsByAcademicYearHelper } = require('./student.helper');
 
-//*************** IMPORT UTILITIES ***************
+// *************** IMPORT VALIDATOR ***************
+const { GetStudentsByAcademicYearSchema, ValidateInput } = require('./student.validator');
+
+// *************** IMPORT UTILITIES ***************
 const { NormalizeGqlError } = require('../../../shared/utils/normalize_gql_error');
 
 // *************** QUERY ***************
 /**
  * Retrieves all student records.
+ *
  * @returns {Promise<Array>} List of all student documents.
  */
 async function GetAllStudents() {
@@ -18,7 +21,25 @@ async function GetAllStudents() {
   }
 }
 
+/**
+ * Retrieves students enrolled in a specific academic year.
+ *
+ * @param {Object} _ - GraphQL parent resolver (not used).
+ * @param {Object} args - GraphQL arguments containing the input payload.
+ * @returns {Promise<Object>}
+ */
+async function GetStudentsByAcademicYear(_, args) {
+  try {
+    const payload = ValidateInput(GetStudentsByAcademicYearSchema, args && args.input ? args.input : args);
+
+    return await GetStudentsByAcademicYearHelper(payload);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
+}
+
 // *************** EXPORT MODULE ***************
 module.exports = {
   GetAllStudents,
+  GetStudentsByAcademicYear,
 };

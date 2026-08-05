@@ -23,7 +23,15 @@ async function StartServer() {
 
   await server.start();
 
-  app.use('/graphql', expressMiddleware(server));
+  app.use(
+    '/graphql',
+    expressMiddleware(server, {
+      context: async ({ req }) => ({
+        req,
+        AcademicYearLoader: require('./loaders/academic_year.loader')(),
+      }),
+    }),
+  );
 
   app.listen(config.port, () => {
     console.log(`Server running at http://localhost:${config.port}`);
