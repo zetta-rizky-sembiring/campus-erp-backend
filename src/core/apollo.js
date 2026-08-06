@@ -6,6 +6,7 @@ const system = require('../features/system');
 const curriculum = require('../features/academic/curriculum');
 const student = require('../features/users/student');
 const enrollment = require('../features/academic/enrollment');
+const studentLoaderResolver = require('../features/users/student/student.loader.resolver');
 
 // *************** GLOBAL VARIABLES ***************
 const server = new ApolloServer({
@@ -15,6 +16,9 @@ const server = new ApolloServer({
     {
       Query: { ...curriculum.queryResolvers, ...student.queryResolvers },
       Mutation: { ...curriculum.mutationResolvers, ...student.mutationResolvers, ...enrollment.mutationResolvers },
+      Student: {
+        academic_years: studentLoaderResolver.StudentAcademicYears,
+      },
     },
   ],
 });

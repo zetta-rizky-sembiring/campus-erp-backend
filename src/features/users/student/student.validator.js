@@ -1,6 +1,12 @@
 // *************** IMPORT LIBRARY ***************
 const Joi = require('joi');
 
+// *************** IMPORT MODULE ***************
+const { AppError } = require('../../../core/error');
+
+// *************** GLOBAL VARIABLES ***************
+const ObjectIdHexSchema = Joi.string().trim().length(24).hex();
+
 // *************** IMPORT VALIDATOR ***************
 const CreateStudentSchema = Joi.object({
   first_name: Joi.string().trim().required(),
@@ -10,6 +16,20 @@ const CreateStudentSchema = Joi.object({
   registration_date: Joi.date().iso().optional(),
 }).unknown(false);
 
+const GetStudentsByAcademicYearSchema = Joi.object({
+  academic_year_id: ObjectIdHexSchema.required(),
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(100).default(10),
+  search: Joi.string().trim().optional(),
+}).unknown(false);
+
+// *************** IMPORT HELPER FUNCTION ***************
+/**
+ * Validates the input payload against the provided schema.
+ * @param {Object} schema - The Joi schema to validate against.
+ * @param {Object} payload - The input payload to validate.
+ * @returns {Object} The validated payload.
+ */
 const ValidateInput = (schema, payload) => {
   const { error, value } = schema.validate(payload, {
     abortEarly: false,
@@ -18,7 +38,7 @@ const ValidateInput = (schema, payload) => {
 
   if (error) {
     const details = error.details.map((detail) => detail.message).join(', ');
-    throw new Error(`Validation failed: ${details}`);
+    throw new AppError(`Validation failed: ${details}`, 'VALIDATION_ERROR', 400);
   }
 
   return value;
@@ -27,5 +47,6 @@ const ValidateInput = (schema, payload) => {
 // *************** EXPORT MODULE ***************
 module.exports = {
   CreateStudentSchema,
+  GetStudentsByAcademicYearSchema,
   ValidateInput,
 };
