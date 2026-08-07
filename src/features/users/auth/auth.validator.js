@@ -8,6 +8,7 @@ const { AppError } = require('../../../core/error');
 const ObjectIdHexSchema = Joi.string().trim().length(24).hex();
 
 const LoginSchema = Joi.object({
+  name: Joi.string(),
   email: Joi.string().email().trim().required(),
   password: Joi.string().trim().required(),
 });

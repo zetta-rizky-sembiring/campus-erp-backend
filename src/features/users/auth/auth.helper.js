@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const { UserModel } = require('../user.model');
 const { AppError } = require('../../../core/error');
 const config = require('../../../core/config');
+const { ValidateInput, LoginSchema } = require('./auth.validator');
 
 const JWT_SECRET = config.jwt.secret;
 
@@ -19,7 +20,8 @@ const JWT_SECRET = config.jwt.secret;
  * @throws {AppError} If the email is not found or the password is invalid.
  */
 async function LoginHelper(payload) {
-  const { email, password } = payload;
+  const input = ValidateInput(LoginSchema, payload);
+  const { email, password } = input;
 
   // ***************Find user by email
   const user = await UserModel.findOne({ email }).lean();
@@ -35,7 +37,15 @@ async function LoginHelper(payload) {
 
   // ***************Generate JWT token
   const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
-  return token;
+  return {
+    token,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
+  };
 }
 // *************** END: LoginHelper ***************
 

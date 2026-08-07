@@ -19,6 +19,6 @@ module.exports = {
     uri: process.env.MONGO_URI,
   },
   jwt: {
-    secret: process.env.JWT_SECRET || 'dev-secret',
+    secret: process.env.JWT_SECRET,
   },
 };

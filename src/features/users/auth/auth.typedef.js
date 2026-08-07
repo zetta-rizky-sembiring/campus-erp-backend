@@ -7,16 +7,23 @@ module.exports = `
 
   type User {
     _id: ID!
+    name: String
     email: String!
     role: UserRole!
   }
 
   input LoginInput {
+    name: String
     email: String!
     password: String!
   }
 
+  type LoginPayload {
+    token: String!
+    user: User!
+  }
+
   type Mutation {
-    Login(input: LoginInput!): String!
+    Login(input: LoginInput!): LoginPayload!
   }
 `;
