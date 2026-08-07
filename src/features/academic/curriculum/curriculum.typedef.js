@@ -85,15 +85,15 @@ module.exports = `
   }
 
   type Mutation {
-    CreateBlock(input: CreateBlockInput!): Block!
+    CreateBlock(input: CreateBlockInput!): Block! @auth(requires: ADMIN)
     UpdateBlock(id: ID!, input: UpdateBlockInput!): Block!
     DeleteBlock(id: ID!): Boolean!
 
-    CreateSubject(input: CreateSubjectInput!): Subject!
+    CreateSubject(input: CreateSubjectInput!): Subject! @auth(requires: ADMIN)
     UpdateSubject(id: ID!, input: UpdateSubjectInput!): Subject!
     DeleteSubject(id: ID!): Boolean!
 
-    CreateTest(input: CreateTestInput!): Test!
+    CreateTest(input: CreateTestInput!): Test! @auth(requires: ADMIN)
     UpdateTest(id: ID!, input: UpdateTestInput!): Test!
     DeleteTest(id: ID!): Boolean!
   }
