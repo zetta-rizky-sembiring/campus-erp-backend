@@ -8,6 +8,7 @@ const config = require('./core/config');
 require('./core/db');
 
 const server = require('./core/apollo');
+const AuthMiddleware = require('./shared/middleware/auth.middleware');
 
 // *************** MUTATION ***************
 /**
@@ -23,12 +24,15 @@ async function StartServer() {
 
   await server.start();
 
+  app.use(AuthMiddleware);
+
   app.use(
     '/graphql',
     expressMiddleware(server, {
       context: async ({ req }) => ({
-        req,
+        user: req.user,
         AcademicYearLoader: require('./loaders/academic_year.loader')(),
+        req,
       }),
     }),
   );

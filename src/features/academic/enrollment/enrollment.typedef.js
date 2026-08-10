@@ -23,6 +23,6 @@ module.exports = `
 
   type Mutation {
     EnrollStudent(input: EnrollStudentInput!): AcademicYear!
-    EnrollStudentsToYear(input: EnrollStudentInput!): AcademicYear!
+    EnrollStudentsToYear(input: EnrollStudentInput!): AcademicYear! @auth(requires: ADMIN)
   }
 `;
