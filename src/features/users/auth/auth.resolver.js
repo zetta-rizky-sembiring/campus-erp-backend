@@ -1,5 +1,5 @@
 // *************** IMPORT MODULE ***************
-const { LoginSchema, ValidateInput } = require('./auth.validator');
+const { LoginSchema } = require('./auth.validator');
 const { LoginHelper } = require('./auth.helper');
 
 /**

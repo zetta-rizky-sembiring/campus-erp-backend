@@ -7,7 +7,8 @@ const jwt = require('jsonwebtoken');
 const { UserModel } = require('../user.model');
 const { AppError } = require('../../../core/error');
 const config = require('../../../core/config');
-const { ValidateInput, LoginSchema } = require('./auth.validator');
+const { LoginSchema } = require('./auth.validator');
+const ValidateInput = require('../../../shared/validators/validate_input_with_joi');
 
 const JWT_SECRET = config.jwt.secret;
 
@@ -37,15 +38,7 @@ async function LoginHelper(payload) {
 
   // ***************Generate JWT token
   const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
-  return {
-    token,
-    user: {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    },
-  };
+  return token;
 }
 // *************** END: LoginHelper ***************
 

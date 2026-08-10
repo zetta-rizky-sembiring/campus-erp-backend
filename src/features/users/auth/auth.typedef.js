@@ -18,12 +18,7 @@ module.exports = `
     password: String!
   }
 
-  type LoginPayload {
-    token: String!
-    user: User!
-  }
-
   type Mutation {
-    Login(input: LoginInput!): LoginPayload!
+    Login(input: LoginInput!): String!
   }
 `;
