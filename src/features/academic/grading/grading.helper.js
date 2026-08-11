@@ -26,6 +26,10 @@ async function SubmitTestGradesHelper(payload) {
   // ***************Rule 2 - Pre-Validation Setup
   const extractedStudentIds = payload.grades.map((grade) => NormalizeObjectId(grade.student_id));
 
+  if (extractedStudentIds.length === 0 || extractedStudentIds.some((studentId) => !studentId)) {
+    throw new AppError('Invalid student references', ERROR_CODES.INVALID_STUDENT_REFERENCE, 400);
+  }
+
   // ***************Rule 3 - Efficient Foreign Key Check (single $in query, no N+1)
   const validStudents = await StudentModel.find({ _id: { $in: extractedStudentIds } });
   const validStudentMap = new Map(validStudents.map((student) => [student._id.toString(), student]));
@@ -35,7 +39,7 @@ async function SubmitTestGradesHelper(payload) {
     const studentObjectId = NormalizeObjectId(grade.student_id);
 
     if (!validStudentMap.has(studentObjectId.toString())) {
-      throw new AppError(`Student ${grade.student_id} does not exist`, ERROR_CODES.INVALID_STUDENT_REFERENCE, 400);
+      throw new AppError(`Student does not exist`, ERROR_CODES.INVALID_STUDENT_REFERENCE, 400);
     }
   }
 
