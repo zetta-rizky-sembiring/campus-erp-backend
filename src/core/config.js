@@ -1,8 +1,8 @@
 // *************** IMPORT LIBRARY ***************
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 
 // *************** GLOBAL VARIABLES ***************
-const required = ['PORT', 'MONGO_URI'];
+const required = ['PORT', 'MONGO_URI', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS'];
 
 // *************** Validation for environment variables
 for (const key of required) {
@@ -20,5 +20,11 @@ module.exports = {
   },
   jwt: {
     secret: process.env.JWT_SECRET,
+  },
+  smtp: {
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 };
