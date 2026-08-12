@@ -1,6 +1,7 @@
 // *************** IMPORT LIBRARY ***************
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const { expressMiddleware } = require('@apollo/server/express4');
 
 // *************** IMPORT MODULE ***************
@@ -9,6 +10,7 @@ require('./core/db');
 
 const server = require('./core/apollo');
 const AuthMiddleware = require('./shared/middleware/auth.middleware');
+const { InitializeGradeAuditorJob } = require('./jobs/missing_grades.job');
 
 // *************** MUTATION ***************
 /**
@@ -23,6 +25,10 @@ async function StartServer() {
   app.use(express.json());
 
   await server.start();
+
+  // ***************Wait for MongoDB before scheduling the background grade auditor
+  await mongoose.connection.asPromise();
+  InitializeGradeAuditorJob();
 
   app.use(AuthMiddleware);
 
