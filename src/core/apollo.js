@@ -10,9 +10,18 @@ const auth = require('../features/users/auth');
 const enrollment = require('../features/academic/enrollment');
 const studentLoaderResolver = require('../features/users/student/student.loader.resolver');
 const { AuthDirectiveTransformer, AuthDirectiveTypeDefs } = require('../shared/directives/auth.directive');
+const grading = require('../features/academic/grading');
 
 // *************** GLOBAL VARIABLES ***************
-const typeDefs = [AuthDirectiveTypeDefs, system.typeDefs, curriculum.typeDefs, student.typeDefs, auth.typeDefs, enrollment.typeDefs];
+const typeDefs = [
+  AuthDirectiveTypeDefs,
+  system.typeDefs,
+  curriculum.typeDefs,
+  student.typeDefs,
+  auth.typeDefs,
+  enrollment.typeDefs,
+  grading.typeDefs,
+];
 const resolvers = [
   system.resolvers,
   {
@@ -22,6 +31,7 @@ const resolvers = [
       ...student.mutationResolvers,
       ...auth.mutationResolvers,
       ...enrollment.mutationResolvers,
+      ...grading.mutationResolvers,
     },
     Student: {
       academic_years: studentLoaderResolver.StudentAcademicYears,
