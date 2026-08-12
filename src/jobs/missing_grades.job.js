@@ -138,10 +138,10 @@ async function RunMissingGradeAuditor() {
     return;
   }
 
-  // *************** Resolve alert recipients once: every user holding the TEACHER role
-  const teacherUsers = await UserModel.find({ role: 'TEACHER' }).select('email').lean();
+  // *************** Resolve the alert recipient once: the first user holding the TEACHER role
+  const teacher = await UserModel.findOne({ role: 'TEACHER' }).select('email').lean();
 
-  if (teacherUsers.length === 0) {
+  if (!teacher) {
     console.error('Missing grade auditor aborted: no users with role TEACHER found.');
     return;
   }
@@ -162,8 +162,6 @@ async function RunMissingGradeAuditor() {
     // *************** END: Idempotency check ***************
 
     // *************** START: Dispatch email + lock notification ***************
-    // *************** Pick a random teacher as the recipient for this alert
-    const randomTeacher = teacherUsers[Math.floor(Math.random() * teacherUsers.length)];
 
     const htmlBody = `
       <h2>Missing Grade Alert</h2>
@@ -178,7 +176,7 @@ async function RunMissingGradeAuditor() {
     `;
 
     try {
-      await SendEmail(randomTeacher.email, `[MISSING GRADE] ${missing.student_name} - ${missing.test_name}`, htmlBody);
+      await SendEmail(teacher.email, `[MISSING GRADE] ${missing.student_name} - ${missing.test_name}`, htmlBody);
 
       await NotificationLogModel.create({
         type: 'MISSING_GRADE_ALERT',
