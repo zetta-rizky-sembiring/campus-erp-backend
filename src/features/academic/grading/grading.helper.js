@@ -1,3 +1,7 @@
+// *************** IMPORT LIBRARY ***************
+const path = require('path');
+const { Worker } = require('worker_threads');
+
 // *************** IMPORT MODULE ***************
 const { StudentGradeModel } = require('./student_grade.model');
 const { StudentModel } = require('../../users/student/student.model');
@@ -52,7 +56,30 @@ async function SubmitTestGradesHelper(payload) {
   }));
 
   // ***************Rule 6 - Bulk Insert
-  return await StudentGradeModel.insertMany(mappedGrades);
+  const insertedGrades = await StudentGradeModel.insertMany(mappedGrades);
+
+  // ***************Rule 7 - Background Aggregation (non-blocking)
+  const workerPayload = JSON.stringify({
+    student_ids: extractedStudentIds.map((id) => id.toString()),
+    test_id: payload.test_id,
+    academic_year_id: payload.academic_year_id,
+  });
+
+  const worker = new Worker(path.join(__dirname, '../../../workers/grade_aggregator.worker.js'), {
+    workerData: workerPayload,
+  });
+
+  // ***************Log background crashes without blocking the API response
+  worker.on('error', (error) => {
+    console.error('[GradeAggregatorWorker] crashed:', error.message);
+  });
+
+  // ***************Log worker termination for observability
+  worker.on('exit', (code) => {
+    console.log(`[GradeAggregatorWorker] exited with code ${code}`);
+  });
+
+  return insertedGrades;
 }
 
 // *************** EXPORT MODULE ***************
