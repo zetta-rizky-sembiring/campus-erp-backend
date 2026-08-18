@@ -122,7 +122,7 @@ async function RunGradeAggregationWorker() {
     subject_id: { $in: subjectIds },
   }).lean();
 
-  const blockTestIds = tests.map((testDoc) => testDoc._id);
+  const blockTestIds = await TestModel.distinct('_id', { subject_id: { $in: subjectIds } }).lean();
   // *************** END: Load every subject and test inside the block ***************
 
   // ***************Fetch every grade for the cohort inside this academic year and block
@@ -135,6 +135,9 @@ async function RunGradeAggregationWorker() {
   // ***************Group grades by student and test for O(1) lookups later
   const gradesByStudentAndTest = new Map();
 
+  if (grades.length === 0) {
+    throw new Error('Worker aborted: no grades found for the cohort');
+  }
   for (const grade of grades) {
     const key = `${grade.student_id}_${grade.test_id}`;
 
@@ -148,6 +151,9 @@ async function RunGradeAggregationWorker() {
   // *************** START: Compute per-test results for every student ***************
   const testResultsByStudent = new Map();
 
+  if (!studentIds || studentIds.length === 0) {
+    throw new Error('Worker aborted: no student list found for the cohort');
+  }
   for (const studentId of studentIds) {
     const studentTestResults = [];
 
