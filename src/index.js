@@ -26,8 +26,6 @@ async function StartServer() {
 
   await server.start();
 
-  // ***************Wait for MongoDB before scheduling the background grade auditor
-  await mongoose.connection.asPromise();
   InitializeGradeAuditorJob();
 
   app.use(AuthMiddleware);

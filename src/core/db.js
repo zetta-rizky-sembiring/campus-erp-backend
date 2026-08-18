@@ -4,14 +4,7 @@ const mongoose = require('mongoose');
 // *************** IMPORT MODULE ***************
 const config = require('./config');
 
-mongoose
-  .connect(config.db.uri)
-  .then(() => {
-    console.log('MongoDB connected');
-  })
-  .catch((err) => {
-    console.error('MongoDB connection error:', err.message);
-  });
+const DatabaseConnection = mongoose.connect(config.db.uri);
 
 mongoose.connection.on('connected', () => {
   console.log('MongoDB connection established');
@@ -26,4 +19,7 @@ mongoose.connection.on('disconnected', () => {
 });
 
 // *************** EXPORT MODULE ***************
-module.exports = mongoose.connection;
+module.exports = {
+  connection: mongoose.connection,
+  DatabaseConnection,
+};
