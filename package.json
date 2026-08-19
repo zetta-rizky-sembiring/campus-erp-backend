@@ -22,11 +22,13 @@
     "dotenv": "^17.4.2",
     "express": "^4.22.2",
     "graphql": "^16.14.2",
+    "handlebars": "^4.7.9",
     "joi": "^18.2.3",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.8.1",
     "node-cron": "^4.6.0",
-    "nodemailer": "^9.0.5"
+    "nodemailer": "^9.0.5",
+    "puppeteer": "^25.8.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

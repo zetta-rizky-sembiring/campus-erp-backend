@@ -11,6 +11,8 @@ require('./core/db');
 const server = require('./core/apollo');
 const AuthMiddleware = require('./shared/middleware/auth.middleware');
 const { InitializeGradeAuditorJob } = require('./jobs/missing_grades.job');
+const gradingRestRouter = require('./features/academic/grading/grading.rest.router');
+const { InitializePDFService } = require('./shared/services/pdf.service');
 
 // *************** MUTATION ***************
 /**
@@ -27,6 +29,10 @@ async function StartServer() {
   await server.start();
 
   InitializeGradeAuditorJob();
+
+  await InitializePDFService();
+
+  app.use('/api/academics', gradingRestRouter);
 
   app.use(AuthMiddleware);
 

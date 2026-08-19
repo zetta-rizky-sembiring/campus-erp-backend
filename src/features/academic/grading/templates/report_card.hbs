@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <title>Student Report Card {{student.first_name}} {{student.last_name}}</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      color: #222;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .student-info {
+      margin-bottom: 30px;
+    }
+
+    .student-info p {
+      margin: 4px 0;
+    }
+
+    .block {
+      margin-bottom: 30px;
+    }
+
+    .block-header {
+      margin-bottom: 10px;
+    }
+
+    .block-header h2 {
+      margin-bottom: 5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #f2f2f2;
+    }
+
+    .status {
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Student Report Card</h1>
+
+  <div class="student-info">
+    <p>
+      <strong>Student:</strong>
+      {{student.first_name}} {{student.last_name}}
+    </p>
+  </div>
+
+  {{#each standings}}
+    <div class="block">
+      <div class="block-header">
+        <h2>Block: {{block_name}}</h2>
+
+        <p>
+          <strong>Block Average:</strong>
+          {{block_average}}
+        </p>
+
+        <p>
+          <strong>Block Status:</strong>
+          <span class="status">{{block_status}}</span>
+        </p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Subject Average</th>
+            <th>Subject Status</th>
+            <th>Test</th>
+            <th>Test Mark</th>
+            <th>Test Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {{#each subjects}}
+            {{#each tests}}
+              <tr>
+                <td>{{../subject_name}}</td>
+                <td>{{../subject_average}}</td>
+                <td>{{../subject_status}}</td>
+                <td>{{test_name}}</td>
+                <td>{{total_mark}}</td>
+                <td>{{test_status}}</td>
+              </tr>
+            {{/each}}
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  {{/each}}
+</body>
+</html>
