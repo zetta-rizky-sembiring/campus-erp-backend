@@ -7,6 +7,7 @@ const { DatabaseConnection } = require('../core/db');
 const { BlockModel, SubjectModel, TestModel } = require('../features/academic/curriculum/curriculum.model');
 const { StudentGradeModel } = require('../features/academic/grading/student_grade.model');
 const { AcademicStandingModel } = require('../features/academic/grading/academic_standing.model');
+const { DispatchAcademicStandings } = require('../shared/services/webhook.service');
 
 /**
  * Evaluate a single grading rule against a numeric value.
@@ -261,6 +262,7 @@ async function RunGradeAggregationWorker() {
 
   // *************** START: Build one upsert operation per student standing ***************
   const operations = [];
+  const calculatedStandings = [];
 
   for (const studentId of studentIds) {
     const blockResult = blockResultsByStudent.get(studentId.toString());
@@ -268,6 +270,15 @@ async function RunGradeAggregationWorker() {
     if (!blockResult) {
       continue;
     }
+
+    calculatedStandings.push({
+      student_id: studentId,
+      academic_year_id: academicYearId,
+      block_id: blockResult.block_id,
+      block_average: blockResult.block_average,
+      block_status: blockResult.block_status,
+      subjects: blockResult.subjects,
+    });
 
     operations.push({
       updateOne: {
@@ -292,6 +303,9 @@ async function RunGradeAggregationWorker() {
   // ***************Persist all academic standings in one bulk operation (single round-trip)
   if (operations.length > 0) {
     await AcademicStandingModel.bulkWrite(operations);
+
+    // ***************Trigger webhook after database persistence
+    await DispatchAcademicStandings(calculatedStandings);
   }
 
   // ***************Notify the parent thread that aggregation completed
