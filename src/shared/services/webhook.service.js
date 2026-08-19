@@ -17,6 +17,7 @@ async function DispatchAcademicStandings(standingsArray) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-api-key': config.webhook.apiKey,
       },
       body: JSON.stringify({
         event: 'ACADEMIC_STANDINGS_UPDATED',

@@ -2,7 +2,7 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 
 // *************** GLOBAL VARIABLES ***************
-const required = ['PORT', 'MONGO_URI', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'WEBHOOK_WAREHOUSE_URL'];
+const required = ['PORT', 'MONGO_URI', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'WEBHOOK_WAREHOUSE_URL', 'WEBHOOK_API_KEY'];
 
 // *************** Validation for environment variables
 for (const key of required) {
@@ -28,6 +28,9 @@ module.exports = {
     pass: process.env.SMTP_PASS,
   },
   webhook: {
+    // Webhook URL of the external data warehouse
     warehouse: String(process.env.WEBHOOK_WAREHOUSE_URL),
+    // Shared secret sent as the x-api-key header for the warehouse
+    apiKey: String(process.env.WEBHOOK_API_KEY),
   },
 };
